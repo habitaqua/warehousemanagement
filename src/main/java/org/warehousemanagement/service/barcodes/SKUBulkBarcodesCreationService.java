@@ -13,7 +13,7 @@ import com.itextpdf.layout.property.TextAlignment;
 import lombok.extern.slf4j.Slf4j;
 import org.warehousemanagement.entities.SKUBarcodeDataDTO;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequestDTO;
-import org.warehousemanagement.sao.InventoryDbSAO;
+import org.warehousemanagement.dao.InventoryDynamoDbImpl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,14 +30,14 @@ public class SKUBulkBarcodesCreationService {
     public static final String BARCODE_INFO_DELIMITER = "<%>";
     Clock clock;
     BarcodesPersistor barcodesPersistor;
-    InventoryDbSAO InventoryDbSAO;
+    InventoryDynamoDbImpl InventoryDynamoDbImpl;
 
     @Inject
     public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor,
-            InventoryDbSAO InventoryDbSAO) {
+            InventoryDynamoDbImpl InventoryDynamoDbImpl) {
         this.clock = clock;
         this.barcodesPersistor = barcodesPersistor;
-        this.InventoryDbSAO = InventoryDbSAO;
+        this.InventoryDynamoDbImpl = InventoryDynamoDbImpl;
     }
 
     public String createBarcodesInBulk(SKUBarcodesGenerationRequestDTO skuBarcodesGenerationRequestDTO)

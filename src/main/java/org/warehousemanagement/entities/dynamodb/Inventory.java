@@ -1,34 +1,27 @@
 package org.warehousemanagement.entities.dynamodb;
 
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
-import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConvertedEnum;
+import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.google.common.base.Preconditions;
 import lombok.Builder;
 import lombok.Getter;
+import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.SKUCategory;
 import org.warehousemanagement.entities.SKUType;
+import org.warehousemanagement.entities.dynamodb.typeconvertors.InventoryStatusTypeConvertor;
+import org.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
 
-@DynamoDBTable(tableName = "sku-inventory")
+@DynamoDBTable(tableName = "inventory")
 @Getter
 public class Inventory {
 
-    @DynamoDBHashKey(attributeName = "skuId")
-    private String skuId;
+    @DynamoDBHashKey(attributeName = "uniqueItemId")
+    private String uniqueItemId;
 
-    @DynamoDBAttribute(attributeName = "warehouseId")
-    private String warehouseId;
+    @DynamoDBAttribute(attributeName = "warehouseLocationId")
+    private String warehouseLocationId;
 
-    @DynamoDBAttribute(attributeName = "locationId")
-    private String locationId;
-
-    @DynamoDBAttribute(attributeName = "skuType")
-    @DynamoDBTypeConvertedEnum
-    private SKUType skuType;
-
-    @DynamoDBAttribute(attributeName = "companyId")
-    private String companyId;
+    @DynamoDBAttribute(attributeName = "skuCode")
+    private String skuCode;
 
     @DynamoDBAttribute(attributeName = "creationTime")
     private long creationTime;
@@ -36,26 +29,30 @@ public class Inventory {
     @DynamoDBAttribute(attributeName = "modifiedTime")
     private long modifiedTime;
 
-    @DynamoDBAttribute(attributeName = "skuCategory")
-    @DynamoDBTypeConvertedEnum
-    private SKUCategory skuCategory;
-
     @DynamoDBAttribute(attributeName = "status")
-    private String status;
+    @DynamoDBTypeConverted(converter = InventoryStatusTypeConvertor.class)
+    private InventoryStatus status;
+
+    private String orderId;
 
     @Builder
-    private Inventory(String skuId, String warehouseId, String locationId, String companyId, long creationTime,
-            long modifiedTime, SKUCategory skuCategory, SKUType skuType, String inventoryStatus) {
-        Preconditions.checkArgument(skuId != null, "itemId cannot be null");
-        this.skuId = skuId;
-        this.companyId = companyId;
-        this.warehouseId = warehouseId;
-        this.locationId = locationId;
+    private Inventory(String skuId, String warehouseLocationId, String skuCode, InventoryStatus inventoryStatus,
+                      String orderId, Long creationTime, Long modifiedTime) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuId), "skuId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseLocationId), "warehouseLocationId" +
+                " cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
+        Preconditions.checkArgument(inventoryStatus != null, "inventoryStatus cannot be null");
+        Preconditions.checkArgument(creationTime != null, "creationTime cannot be null");
+        Preconditions.checkArgument(modifiedTime != null, "modifiedTime cannot be null");
+
+
+        this.uniqueItemId = skuId;
+        this.warehouseLocationId = warehouseLocationId;
         this.creationTime = creationTime;
         this.modifiedTime = modifiedTime;
-        this.skuCategory = skuCategory;
-        this.skuType = skuType;
-        this.locationId = locationId;
+        this.skuCode = skuCode;
         this.status = inventoryStatus;
+        this.orderId = orderId;
     }
 }

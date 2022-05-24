@@ -3,31 +3,42 @@ package org.warehousemanagement.entities.inventory;
 import com.google.common.base.Preconditions;
 import lombok.Builder;
 import lombok.Value;
-import org.warehousemanagement.entities.SKUCategory;
-import org.warehousemanagement.entities.SKUType;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
+
+import java.util.List;
+import java.util.Set;
 
 @Value
 public class InventoryDTO {
 
-    String skuId;
-    String companyId;
-    String locationId;
+    List<String> uniqueItemIds;
+
+    String containerId;
     String warehouseId;
-    SKUCategory skuCategory;
-    SKUType skuType;
+
+    String skuCode;
     InventoryStatus inventoryStatus;
+    String orderId;
+    String inboundId;
+    String outboundId;
 
     @Builder
-    private InventoryDTO(String skuId, String companyId, String warehouseId, SKUCategory skuCategory,
-            SKUType skuType, String locationId, InventoryStatus inventoryStatus) {
-        Preconditions.checkArgument(skuId!=null, "skuId cannot be null");
-        this.skuId = skuId;
-        this.companyId = companyId;
+    private InventoryDTO(List<String> uniqueItemIds, String warehouseId, String skuCode, String containerId,
+                         InventoryStatus inventoryStatus, String orderId, String inboundId) {
+        Preconditions.checkArgument(CollectionUtils.isNotEmpty(uniqueItemIds), "uniqueItemIds cannot be empty");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "locationId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "locationId cannot be blank");
+
+        this.uniqueItemIds = uniqueItemIds;
         this.warehouseId = warehouseId;
-        this.skuCategory = skuCategory;
-        this.skuType = skuType;
-        this.locationId = locationId;
+        this.skuCode = skuCode;
+        this.containerId = containerId;
         this.inventoryStatus = inventoryStatus;
+        this.inboundId = inboundId;
+        this.outboundId = inboundId;
+        this.orderId = orderId;
     }
 }

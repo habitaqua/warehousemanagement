@@ -14,7 +14,7 @@ public class PaginatedResponse<T> {
     String nextPageToken;
 
 
-    public Optional<String> getNextPageToken() {
-        return Optional.ofNullable(nextPageToken);
+    public String getNextPageToken() {
+        return nextPageToken;
     }
 }
