@@ -11,7 +11,7 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
 import lombok.extern.slf4j.Slf4j;
-import org.warehousemanagement.entities.SKUBarcodeDataDTO;
+import org.warehousemanagement.entities.BarcodeDataDTO;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequestDTO;
 import org.warehousemanagement.dao.InventoryDynamoDbImpl;
 
@@ -26,7 +26,6 @@ import java.util.stream.IntStream;
 @Slf4j
 public class SKUBulkBarcodesCreationService {
 
-    public static final String ALT_TEXT_DELIMITER = "-";
     public static final String BARCODE_INFO_DELIMITER = "<%>";
     Clock clock;
     BarcodesPersistor barcodesPersistor;
@@ -42,7 +41,7 @@ public class SKUBulkBarcodesCreationService {
 
     public String createBarcodesInBulk(SKUBarcodesGenerationRequestDTO skuBarcodesGenerationRequestDTO)
             throws FileNotFoundException {
-        List<SKUBarcodeDataDTO> barcodesContent = createBarcodesContent(skuBarcodesGenerationRequestDTO);
+        List<BarcodeDataDTO> barcodesContent = createBarcodesContent(skuBarcodesGenerationRequestDTO);
         final String filePath = "/tmp/barcodes.pdf";
         File file = new File(filePath);
         file.getParentFile().mkdirs();
@@ -51,7 +50,7 @@ public class SKUBulkBarcodesCreationService {
         Document doc = new Document(pdfDoc);
         doc.setTextAlignment(TextAlignment.CENTER);
         barcodesContent.forEach(barcodeDataDTO -> {
-            doc.add(addBarcodeToPdf(barcodeDataDTO, pdfDoc));
+           // doc.add(addBarcodeToPdf(barcodeDataDTO, pdfDoc));
             doc.add(new Paragraph());
 
         });
@@ -59,17 +58,16 @@ public class SKUBulkBarcodesCreationService {
         return barcodesPersistor.persistBarcodeFile(filePath);
     }
 
-    private List<SKUBarcodeDataDTO> createBarcodesContent(SKUBarcodesGenerationRequestDTO request) {
+    private List<BarcodeDataDTO> createBarcodesContent(SKUBarcodesGenerationRequestDTO request) {
         int quantity = request.getQuantity();
-        List<SKUBarcodeDataDTO> barcodeDataDTOS = new ArrayList<>();
+        List<BarcodeDataDTO> barcodeDataDTOS = new ArrayList<>();
         IntStream.range(0, quantity).forEach(iteration ->
-                barcodeDataDTOS.add(SKUBarcodeDataDTO.builder().skuId(UUID.randomUUID().toString())
-                        .skuCategory(request.getSkuCategory())
-                        .skuType(request.getSkuType()).build()));
+                barcodeDataDTOS.add(BarcodeDataDTO.builder().valueToEncode(UUID.randomUUID().toString())
+                        .altText(request.getSkuCategory().toString()).build()));
         return barcodeDataDTOS;
     }
 
-    private Paragraph addBarcodeToPdf(SKUBarcodeDataDTO skuBarcodeDataDTO,
+ /*   private Paragraph addBarcodeToPdf(BarcodeDataDTO skuBarcodeDataDTO,
             PdfDocument pdfDoc) {
         String skuCategory = skuBarcodeDataDTO.getSkuCategory().name();
         String skuType = skuBarcodeDataDTO.getSkuType().name();
@@ -83,6 +81,6 @@ public class SKUBulkBarcodesCreationService {
         PdfFormXObject barcodeObject = barcode.createFormXObject(null, null, pdfDoc);
         Paragraph paragraph = new Paragraph().add(new Image(barcodeObject));
         return paragraph;
-    }
+    }*/
 }
 

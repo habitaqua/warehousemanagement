@@ -7,7 +7,7 @@ import java.util.Set;
 public class Active implements OutboundStatus {
     @Override
     public Set<OutboundStatus> previousStates() {
-        return ImmutableSet.of();
+        return ImmutableSet.of(new Active());
     }
 
     @Override

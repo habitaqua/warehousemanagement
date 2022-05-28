@@ -15,13 +15,15 @@ public class FGInboundDTO {
     private InboundStatus status;
     private String userId;
 
-    private long startTime;
+    private Long startTime;
 
-    private long endTime;
+    private Long endTime;
+
+    private Long modifiedTime;
 
     @Builder
     public FGInboundDTO(String warehouseId, String inboundId, InboundStatus status, String userId,
-                        Long startTime, Long endTime) {
+                        Long startTime, Long endTime, Long modifiedTime) {
         Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
 
@@ -31,12 +33,13 @@ public class FGInboundDTO {
         this.userId = userId;
         this.startTime =startTime;
         this.endTime = endTime;
+        this.modifiedTime = modifiedTime;
     }
 
    public FinishedGoodsInbound toDbEntity() {
         FinishedGoodsInbound inbound = FinishedGoodsInbound.builder().warehouseId(this.getWarehouseId())
-                .inboundId(this.getInboundId()).startTime(this.getStartTime()).modifiedTime(this.getEndTime())
-                .status(this.getStatus()).userId(this.getUserId()).build();
+                .inboundId(this.getInboundId()).startTime(this.getStartTime()).endTime(this.getEndTime())
+                .modifiedTime(this.modifiedTime).status(this.getStatus()).userId(this.getUserId()).build();
         return inbound;
     }
 }

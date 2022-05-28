@@ -5,10 +5,14 @@ import org.warehousemanagement.entities.inbound.inboundstatus.Active;
 import org.warehousemanagement.entities.inbound.inboundstatus.Closed;
 import org.warehousemanagement.entities.inbound.inboundstatus.InboundStatus;
 
-public class InboundStatusTypeConvertor implements DynamoDBTypeConverter<InboundStatus, String> {
+public class InboundStatusTypeConvertor implements DynamoDBTypeConverter<String, InboundStatus> {
 
     @Override
-    public InboundStatus convert(String inboundStatusString) {
+    public String convert(InboundStatus inboundStatus) {
+        return inboundStatus.getStatus();
+    }
+    @Override
+    public InboundStatus unconvert(String inboundStatusString) {
         switch (inboundStatusString) {
             case "ACTIVE":
                 return new Active();
@@ -20,8 +24,5 @@ public class InboundStatusTypeConvertor implements DynamoDBTypeConverter<Inbound
         }
     }
 
-    @Override
-    public String unconvert(InboundStatus inboundStatus) {
-        return inboundStatus.getStatus();
-    }
+
 }

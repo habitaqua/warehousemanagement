@@ -1,6 +1,6 @@
 package org.warehousemanagement.entities.exceptions;
 
-public class ResourceNotAvailableException extends RuntimeException{
+public class ResourceNotAvailableException extends NonRetriableException{
 
 
     public ResourceNotAvailableException() {

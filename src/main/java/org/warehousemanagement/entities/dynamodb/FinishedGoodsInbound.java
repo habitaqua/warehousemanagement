@@ -2,9 +2,7 @@ package org.warehousemanagement.entities.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.google.common.base.Preconditions;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.dynamodb.typeconvertors.InboundStatusTypeConvertor;
 import org.warehousemanagement.entities.inbound.inboundstatus.InboundStatus;
@@ -13,7 +11,7 @@ import org.warehousemanagement.entities.inbound.inboundstatus.InboundStatus;
  * @author moduludu
  * Finished Goods Inbound Details
  */
-@Getter
+@Data
 @DynamoDBTable(tableName = "fg-inbounds")
 @NoArgsConstructor
 public class FinishedGoodsInbound {
@@ -28,11 +26,11 @@ public class FinishedGoodsInbound {
     @DynamoDBAttribute
     private String userId;
     @DynamoDBAttribute
-    private long startTime;
+    private Long startTime;
     @DynamoDBAttribute
-    private long endTime;
+    private Long endTime;
     @DynamoDBAttribute
-    private long modifiedTime;
+    private Long modifiedTime;
 
     @Builder
     private FinishedGoodsInbound(String warehouseId, String inboundId, InboundStatus status, String userId, Long startTime, Long endTime, Long modifiedTime) {

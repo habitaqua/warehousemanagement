@@ -67,6 +67,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public DynamoDBMapper dynamoDBMapper() {
 
+
         AmazonDynamoDB amazonDynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.AP_SOUTH_1).build();
         System.out.println("provided dynamoodb");
         DynamoDBMapperConfig dynamoDBMapperConfig = DynamoDBMapperConfig.builder().withConsistentReads(
