@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.warehousemanagement.entities.PaginatedResponse;
-import org.warehousemanagement.entities.container.AddContainerRequest;
 import org.warehousemanagement.entities.container.ContainerDTO;
 import org.warehousemanagement.entities.container.GetContainerRequest;
 import org.warehousemanagement.entities.container.GetContainersRequest;

@@ -16,32 +16,34 @@ public class OutboundDTO {
     private OutboundStatus status;
     private String userId;
 
-    private long startTime;
+    private String customerId;
 
-    private long endTime;
+    private Long startTime;
+
+    private Long endTime;
+
+    private Long modifiedTime;
 
     @Builder
-    public OutboundDTO(String warehouseId, String outboundId, OutboundStatus status, String userId, Long startTime, Long endTime) {
+    public OutboundDTO(String warehouseId, String outboundId, OutboundStatus status, String userId, String customerId, Long startTime, Long endTime, Long modifiedTime) {
         Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(userId), "userId cannot be blank");
-        Preconditions.checkArgument(startTime!=null, "startTime cannot be null");
-        Preconditions.checkArgument(endTime!=null, "endTime cannot be null");
-
-
 
         this.warehouseId = warehouseId;
         this.outboundId = outboundId;
         this.status = status;
         this.userId = userId;
+        this.customerId = customerId;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.modifiedTime = modifiedTime;
     }
 
     public FinishedGoodsOutbound toDbEntity() {
         FinishedGoodsOutbound outbound = FinishedGoodsOutbound.builder().warehouseId(this.getWarehouseId())
-                .outboundId(this.getOutboundId()).startTime(this.getStartTime()).modifiedTime(this.getEndTime())
-                .status(this.getStatus()).userId(this.getUserId()).build();
+                .outboundId(this.getOutboundId()).customerId(this.getCustomerId()).startTime(this.getStartTime())
+                .modifiedTime(this.getModifiedTime()).endTime(this.getEndTime()).status(this.getStatus())
+                .userId(this.getUserId()).build();
         return outbound;
     }
 }

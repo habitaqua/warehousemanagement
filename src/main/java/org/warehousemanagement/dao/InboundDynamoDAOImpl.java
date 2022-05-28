@@ -41,6 +41,11 @@ public class InboundDynamoDAOImpl implements InboundDAO {
     public void add(FGInboundDTO fgInboundDTO) {
         try {
             Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
+            Preconditions.checkArgument(fgInboundDTO.getStatus() != null, "fgInboundDTO.status cannot be null");
+            Preconditions.checkArgument(fgInboundDTO.getStartTime() != null, "fgInboundDTO.startTime cannot be null");
+            Preconditions.checkArgument(StringUtils.isNotBlank(fgInboundDTO.getUserId()), "fgInboundDTO.userId cannot be blank or null");
+
+
             FinishedGoodsInbound finishedGoodsInbound = fgInboundDTO.toDbEntity();
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
             Map expected = new HashMap();

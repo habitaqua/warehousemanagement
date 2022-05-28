@@ -14,33 +14,36 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.warehousemanagement.entities.dynamodb.FinishedGoodsInbound;
+import org.warehousemanagement.entities.dynamodb.FinishedGoodsOutbound;
 import org.warehousemanagement.entities.exceptions.NonRetriableException;
 import org.warehousemanagement.entities.exceptions.ResourceAlreadyExistsException;
 import org.warehousemanagement.entities.exceptions.RetriableException;
-import org.warehousemanagement.entities.inbound.FGInboundDTO;
-import org.warehousemanagement.entities.inbound.inboundstatus.Active;
-import org.warehousemanagement.entities.inbound.inboundstatus.Closed;
+import org.warehousemanagement.entities.outbound.OutboundDTO;
+import org.warehousemanagement.entities.outbound.outboundstatus.Active;
+import org.warehousemanagement.entities.outbound.outboundstatus.Closed;
 
 import java.time.Clock;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestInboundDynamoDAOImpl {
+public class TestOutboundDynamoDAOImpl {
 
 
-    private static final String INBOUND_1 = "INBOUND-1";
+    private static final String OUTBOUND_1 = "INBOUND-1";
 
     private static final String WAREHOUSE_1 = "WAREHOUSE-1";
 
     private static final String USER_ID = "user-1";
 
-    InboundDynamoDAOImpl inboundDbSAO;
+    private static final String CUSTOMER_ID = "customer-1";
+
+    OutboundDynamoDAOImpl outboundDynamoDAO;
     @Mock
     DynamoDBMapper dynamoDBMapper;
 
     @Mock
-    PaginatedQueryList<FinishedGoodsInbound> paginatedQueryList;
+    PaginatedQueryList<FinishedGoodsOutbound> paginatedQueryList;
 
     @Captor
     ArgumentCaptor<DynamoDBSaveExpression> dynamoDBSaveExpressionCaptor;
@@ -49,7 +52,7 @@ public class TestInboundDynamoDAOImpl {
     ArgumentCaptor<DynamoDBQueryExpression> dynamoDBQueryExpressionCaptor;
 
     @Captor
-    ArgumentCaptor<FinishedGoodsInbound> finishedGoodsInboundCaptor;
+    ArgumentCaptor<FinishedGoodsOutbound> finishedGoodsOutboundCaptor;
 
     Clock clock;
 
@@ -58,17 +61,17 @@ public class TestInboundDynamoDAOImpl {
     public void setupClass() {
         MockitoAnnotations.initMocks(this);
         clock = Clock.systemUTC();
-        inboundDbSAO = new InboundDynamoDAOImpl(dynamoDBMapper);
+        outboundDynamoDAO = new OutboundDynamoDAOImpl(dynamoDBMapper);
     }
 
     @Test
     public void test_add_success() {
         long startTime = clock.millis();
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
-        inboundDbSAO.add(fgInboundDTO);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyAdd(fgInboundDTO);
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).customerId(CUSTOMER_ID).modifiedTime(startTime).userId(USER_ID).build();
+        outboundDynamoDAO.add(outboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyAdd(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
     }
@@ -76,16 +79,16 @@ public class TestInboundDynamoDAOImpl {
     @Test
     public void test_add_already_existing() {
         long startTime = clock.millis();
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         Mockito.doThrow(new ConditionalCheckFailedException("Hashkey rannge key already exists")).when(dynamoDBMapper)
-                .save(Mockito.any(FinishedGoodsInbound.class), Mockito.any(DynamoDBSaveExpression.class));
+                .save(Mockito.any(FinishedGoodsOutbound.class), Mockito.any(DynamoDBSaveExpression.class));
 
         Assertions.assertThatExceptionOfType(ResourceAlreadyExistsException.class)
-                .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
                 .withCauseExactlyInstanceOf(ConditionalCheckFailedException.class);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyAdd(fgInboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyAdd(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
 
@@ -94,8 +97,8 @@ public class TestInboundDynamoDAOImpl {
     @Test
     public void test_add_input_null_non_retriable_exception() {
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.add(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO cannot be null");
+                .isThrownBy(() -> outboundDynamoDAO.add(null))
+                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -104,12 +107,12 @@ public class TestInboundDynamoDAOImpl {
     @Test
     public void test_add_input_status_null_non_retriable_exception() {
         long startTime = clock.millis();
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
 
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.status cannot be null");
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
+                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.status cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -119,12 +122,12 @@ public class TestInboundDynamoDAOImpl {
     public void test_add_input_starttime_null_non_retriable_exception() {
         long startTime = clock.millis();
 
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .modifiedTime(startTime).userId(USER_ID).build();
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
 
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.startTime cannot be null");
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
+                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.startTime cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -134,12 +137,27 @@ public class TestInboundDynamoDAOImpl {
     public void test_add_input_userId_null_non_retriable_exception() {
         long startTime = clock.millis();
 
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).build();
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).customerId(CUSTOMER_ID).build();
 
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.userId cannot be blank or null");
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
+                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.userId cannot be blank or null");
+        Mockito.verifyZeroInteractions(dynamoDBMapper);
+
+
+    }
+
+    @Test
+    public void test_add_input_customerId_null_non_retriable_exception() {
+        long startTime = clock.millis();
+
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+
+        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
+                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.customerId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -148,23 +166,23 @@ public class TestInboundDynamoDAOImpl {
     @Test
     public void test_add_throws_retriable_xception() {
         long startTime = clock.millis();
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         Mockito.doThrow(new InternalServerErrorException("internal server exception")).when(dynamoDBMapper)
-                .save(Mockito.any(FinishedGoodsInbound.class), Mockito.any(DynamoDBSaveExpression.class));
+                .save(Mockito.any(FinishedGoodsOutbound.class), Mockito.any(DynamoDBSaveExpression.class));
 
         Assertions.assertThatExceptionOfType(RetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyAdd(fgInboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyAdd(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
 
     @Test
     public void test_update_input_null() {
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.update(null))
+                .isThrownBy(() -> outboundDynamoDAO.update(null))
                 .withCauseExactlyInstanceOf(IllegalArgumentException.class);
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
@@ -174,11 +192,11 @@ public class TestInboundDynamoDAOImpl {
     public void test_update_success() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
-        inboundDbSAO.update(fgInboundDTO);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyUpdate(fgInboundDTO);
+        outboundDynamoDAO.update(outboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyUpdate(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
     }
@@ -187,27 +205,27 @@ public class TestInboundDynamoDAOImpl {
     public void test_partial_update_success() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).warehouseId(WAREHOUSE_1)
                 .modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
-        inboundDbSAO.update(fgInboundDTO);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyUpdate(fgInboundDTO);
+        outboundDynamoDAO.update(outboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyUpdate(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
     }
 
     @Test
     public void test_update_no_key_found() {
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .userId(USER_ID).build();
         Mockito.doThrow(new ConditionalCheckFailedException("Hashkey range key is not found ")).when(dynamoDBMapper)
-                .save(Mockito.any(FinishedGoodsInbound.class), Mockito.any(DynamoDBSaveExpression.class));
+                .save(Mockito.any(FinishedGoodsOutbound.class), Mockito.any(DynamoDBSaveExpression.class));
 
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.update(fgInboundDTO))
+                .isThrownBy(() -> outboundDynamoDAO.update(outboundDTO))
                 .withCauseExactlyInstanceOf(ConditionalCheckFailedException.class);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyUpdate(fgInboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyUpdate(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
     }
@@ -215,43 +233,43 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_update_internal_server_exception() {
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .userId(USER_ID).build();
         Mockito.doThrow(new InternalServerErrorException("exception")).when(dynamoDBMapper)
-                .save(Mockito.any(FinishedGoodsInbound.class), Mockito.any(DynamoDBSaveExpression.class));
+                .save(Mockito.any(FinishedGoodsOutbound.class), Mockito.any(DynamoDBSaveExpression.class));
 
         Assertions.assertThatExceptionOfType(RetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.update(fgInboundDTO))
+                .isThrownBy(() -> outboundDynamoDAO.update(outboundDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
-        captorVerifyUpdate(fgInboundDTO);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyUpdate(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
     }
 
     @Test
-    public void test_get_last_inbound_input_null() {
+    public void test_get_last_outbound_input_null() {
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.getLastInbound(null))
+                .isThrownBy(() -> outboundDynamoDAO.getLastOutbound(null))
                 .withCauseExactlyInstanceOf(IllegalArgumentException.class);
         Mockito.verifyZeroInteractions(dynamoDBMapper);
     }
 
     @Test
-    public void test_get_last_inbound_success() {
+    public void test_get_last_outbound_success() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenReturn(paginatedQueryList);
-        FinishedGoodsInbound expectedEntity = fgInboundDTO.toDbEntity();
+        FinishedGoodsOutbound expectedEntity = outboundDTO.toDbEntity();
         Mockito.when(paginatedQueryList.stream()).thenReturn(ImmutableList.of(expectedEntity).stream());
-        Optional<FinishedGoodsInbound> lastInboundOp = inboundDbSAO.getLastInbound(fgInboundDTO.getWarehouseId());
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsInbound.class), dynamoDBQueryExpressionCaptor.capture());
+        Optional<FinishedGoodsOutbound> lastOutboundOp = outboundDynamoDAO.getLastOutbound(outboundDTO.getWarehouseId());
+        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
         Mockito.verify(paginatedQueryList).stream();
-        new BooleanAssert(lastInboundOp.isPresent()).isEqualTo(true);
-        Assertions.assertThat(expectedEntity).usingRecursiveComparison().isEqualTo(lastInboundOp.get());
-        captorVerifyQuery(fgInboundDTO);
+        new BooleanAssert(lastOutboundOp.isPresent()).isEqualTo(true);
+        Assertions.assertThat(expectedEntity).usingRecursiveComparison().isEqualTo(lastOutboundOp.get());
+        captorVerifyQuery(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
         Mockito.verifyNoMoreInteractions(paginatedQueryList);
 
@@ -259,94 +277,94 @@ public class TestInboundDynamoDAOImpl {
     }
 
     @Test
-    public void test_get_last_inbound_none_success() {
+    public void test_get_last_outbound_none_success() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenReturn(paginatedQueryList);
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
-        Optional<FinishedGoodsInbound> lastInboundOp = inboundDbSAO.getLastInbound(fgInboundDTO.getWarehouseId());
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsInbound.class), dynamoDBQueryExpressionCaptor.capture());
+        Optional<FinishedGoodsOutbound> lastOutboundOp = outboundDynamoDAO.getLastOutbound(outboundDTO.getWarehouseId());
+        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
         Mockito.verify(paginatedQueryList).stream();
-        new BooleanAssert(lastInboundOp.isPresent()).isEqualTo(false);
-        captorVerifyQuery(fgInboundDTO);
+        new BooleanAssert(lastOutboundOp.isPresent()).isEqualTo(false);
+        captorVerifyQuery(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
         Mockito.verifyNoMoreInteractions(paginatedQueryList);
     }
     @Test
-    public void test_get_last_inbound_internal_server_exception() {
+    public void test_get_last_outbound_internal_server_exception() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenThrow(new InternalServerErrorException("exception"));
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
-        Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(() -> inboundDbSAO.getLastInbound(fgInboundDTO.getWarehouseId())).withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsInbound.class), dynamoDBQueryExpressionCaptor.capture());
+        Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(() -> outboundDynamoDAO.getLastOutbound(outboundDTO.getWarehouseId())).withCauseExactlyInstanceOf(InternalServerErrorException.class);
+        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
         Mockito.verifyZeroInteractions(paginatedQueryList);
-        captorVerifyQuery(fgInboundDTO);
+        captorVerifyQuery(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
 
     @Test
-    public void test_get_last_inbound_exception() {
+    public void test_get_last_outbound_exception() {
         long startTime = clock.millis();
         long modifiedTime = startTime + 10;
-        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+        OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenThrow(new RuntimeException("exception"));
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
-        Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(() -> inboundDbSAO.getLastInbound(fgInboundDTO.getWarehouseId())).withCauseExactlyInstanceOf(RuntimeException.class);
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsInbound.class), dynamoDBQueryExpressionCaptor.capture());
+        Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(() -> outboundDynamoDAO.getLastOutbound(outboundDTO.getWarehouseId())).withCauseExactlyInstanceOf(RuntimeException.class);
+        Mockito.verify(dynamoDBMapper).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
         Mockito.verifyZeroInteractions(paginatedQueryList);
-        captorVerifyQuery(fgInboundDTO);
+        captorVerifyQuery(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
 
 
-    private void captorVerifyAdd(FGInboundDTO fgInboundDTO) {
-        FinishedGoodsInbound actualEntity = finishedGoodsInboundCaptor.getValue();
+    private void captorVerifyAdd(OutboundDTO outboundDTO) {
+        FinishedGoodsOutbound actualEntity = finishedGoodsOutboundCaptor.getValue();
         DynamoDBSaveExpression actualDdbSaveExpression = dynamoDBSaveExpressionCaptor.getValue();
 
         DynamoDBSaveExpression expectedDdbSaveExpression = new DynamoDBSaveExpression();
         Map expected = new HashMap();
         expected.put("warehouseId", new ExpectedAttributeValue().withExists(false));
-        expected.put("inboundId", new ExpectedAttributeValue().withExists(false));
+        expected.put("outboundId", new ExpectedAttributeValue().withExists(false));
         expectedDdbSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
-        FinishedGoodsInbound expectedEntity = fgInboundDTO.toDbEntity();
+        FinishedGoodsOutbound expectedEntity = outboundDTO.toDbEntity();
         Assertions.assertThat(actualDdbSaveExpression).usingRecursiveComparison().isEqualTo(expectedDdbSaveExpression);
         Assertions.assertThat(actualEntity).usingRecursiveComparison().isEqualTo(expectedEntity);
     }
 
-    private void captorVerifyUpdate(FGInboundDTO fgInboundDTO) {
-        FinishedGoodsInbound actualEntity = finishedGoodsInboundCaptor.getValue();
+    private void captorVerifyUpdate(OutboundDTO outboundDTO) {
+        FinishedGoodsOutbound actualEntity = finishedGoodsOutboundCaptor.getValue();
         DynamoDBSaveExpression actualDdbSaveExpression = dynamoDBSaveExpressionCaptor.getValue();
 
         DynamoDBSaveExpression expectedDdbSaveExpression = new DynamoDBSaveExpression();
         Map expected = new HashMap();
-        expected.put("warehouseId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getWarehouseId())));
-        expected.put("inboundId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getInboundId())));
-        if (fgInboundDTO.getStatus() != null) {
-            List<AttributeValue> allowedStatuses = fgInboundDTO.getStatus().previousStates()
+        expected.put("warehouseId", new ExpectedAttributeValue(new AttributeValue(outboundDTO.getWarehouseId())));
+        expected.put("outboundId", new ExpectedAttributeValue(new AttributeValue(outboundDTO.getOutboundId())));
+        if (outboundDTO.getStatus() != null) {
+            List<AttributeValue> allowedStatuses = outboundDTO.getStatus().previousStates()
                     .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
             expected.put("status", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                     .withAttributeValueList(allowedStatuses));
         }
 
         expectedDdbSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
-        FinishedGoodsInbound expectedEntity = fgInboundDTO.toDbEntity();
+        FinishedGoodsOutbound expectedEntity = outboundDTO.toDbEntity();
         Assertions.assertThat(actualDdbSaveExpression).usingRecursiveComparison().isEqualTo(expectedDdbSaveExpression);
         Assertions.assertThat(actualEntity).usingRecursiveComparison().isEqualTo(expectedEntity);
     }
 
-    private void captorVerifyQuery(FGInboundDTO fgInboundDTO) {
+    private void captorVerifyQuery(OutboundDTO outboundDTO) {
 
         DynamoDBQueryExpression actualDdbQueryExpression = dynamoDBQueryExpressionCaptor.getValue();
 
 
         Map<String, AttributeValue> eav = new HashMap();
-        eav.put(":val1", new AttributeValue().withS(fgInboundDTO.getWarehouseId()));
+        eav.put(":val1", new AttributeValue().withS(outboundDTO.getWarehouseId()));
         DynamoDBQueryExpression<FinishedGoodsInbound> expectedDynamoDBQueryExpression = new DynamoDBQueryExpression<FinishedGoodsInbound>()
                 .withKeyConditionExpression("warehouseId = :val1").withExpressionAttributeValues(eav)
                 .withScanIndexForward(false).withLimit(1).withConsistentRead(true);

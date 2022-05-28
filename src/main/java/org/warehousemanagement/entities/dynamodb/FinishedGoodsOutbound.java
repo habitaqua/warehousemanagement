@@ -3,7 +3,7 @@ package org.warehousemanagement.entities.dynamodb;
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.google.common.base.Preconditions;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.dynamodb.typeconvertors.OutboundStatusTypeConvertor;
@@ -14,7 +14,7 @@ import org.warehousemanagement.entities.outbound.outboundstatus.OutboundStatus;
  * outbound to customer mapping is 1:1
  * @author moduludu
  */
-@Getter
+@Data
 @DynamoDBTable(tableName = "fg_outbounds")
 @NoArgsConstructor
 public class FinishedGoodsOutbound {
@@ -32,20 +32,17 @@ public class FinishedGoodsOutbound {
     @DynamoDBAttribute
     private String userId;
     @DynamoDBAttribute
-    private long startTime;
+    private Long startTime;
     @DynamoDBAttribute
-    private long endTime;
+    private Long endTime;
     @DynamoDBAttribute
-    private long modifiedTime;
+    private Long modifiedTime;
 
     @Builder
     private FinishedGoodsOutbound(String warehouseId, String outboundId, String customerId, OutboundStatus status, String userId, Long startTime, Long endTime, Long modifiedTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(customerId), "customerId cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(userId), "userId cannot be blank");
-        Preconditions.checkArgument(startTime != null, "startTime cannot be null");
 
         this.warehouseId = warehouseId;
         this.outboundId = outboundId;
