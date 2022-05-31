@@ -1,7 +1,9 @@
 package org.warehousemanagement.entities.container;
 
+import com.google.common.base.Preconditions;
 import lombok.Builder;
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;
 
@@ -11,21 +13,19 @@ public class GetContainersRequest {
     String warehouseId;
     String pageToken;
     int limit;
-    boolean isFirst;
 
     /**
      *
      * @param warehouseId warehouseId
      * @param pageToken next page token
      * @param limit
-     * @param isFirst page token is null for both last and first request. This flag is used to differentiate.
      */
     @Builder
-    public GetContainersRequest(String warehouseId, String pageToken, int limit, boolean isFirst) {
+    public GetContainersRequest(String warehouseId, String pageToken, int limit) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         this.warehouseId = warehouseId;
         this.pageToken = pageToken;
         this.limit = limit;
-        this.isFirst = isFirst;
     }
 
     public Optional<String> getPageToken() {

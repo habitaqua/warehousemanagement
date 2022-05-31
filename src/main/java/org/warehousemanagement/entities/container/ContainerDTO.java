@@ -21,9 +21,12 @@ public class ContainerDTO {
     int currentCapacity;
     ContainerStatus status;
 
+    Long creationTime;
+    Long modifiedTime;
 
-    private ContainerDTO(String containerId, String warehouseId, Map<String, Integer> skuCodeWisePredefinedCapacity
-            , Integer currentCapacity, ContainerStatus status) {
+
+    private ContainerDTO(String containerId, String warehouseId, Map<String, Integer> skuCodeWisePredefinedCapacity,
+            ContainerStatus status, Integer currentCapacity, Long creationTime, Long modifiedTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "id cannot be empty");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
@@ -31,12 +34,13 @@ public class ContainerDTO {
                 "total capacity cannot be zero or empty");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
         Preconditions.checkArgument(currentCapacity >= 0, "current capacity not in range");
-        Preconditions.checkArgument(status != null, "location status cannot be null");
 
         this.containerId = containerId;
         this.warehouseId = warehouseId;
         this.skuCodeWisePredefinedCapacity = skuCodeWisePredefinedCapacity;
         this.currentCapacity = currentCapacity;
+        this.creationTime = creationTime;
+        this.modifiedTime = modifiedTime;
         this.status = status;
     }
 
@@ -48,6 +52,9 @@ public class ContainerDTO {
         int currentCapacity;
         UOM uom;
         ContainerStatus status;
+        Long creationTime;
+        Long modifiedTime;
+
 
         public Builder containerId(String containerId) {
             this.containerId = containerId;
@@ -56,6 +63,16 @@ public class ContainerDTO {
 
         public Builder warehouseId(String warehouseId) {
             this.warehouseId = warehouseId;
+            return this;
+        }
+
+        public Builder creationTime(Long creationTime) {
+            this.creationTime = creationTime;
+            return this;
+        }
+
+        public Builder modifiedTime(Long modifiedTime) {
+            this.modifiedTime = modifiedTime;
             return this;
         }
 
@@ -68,6 +85,8 @@ public class ContainerDTO {
             this.containerId = container.getContainerId();
             this.warehouseId = container.getWarehouseId();
             this.skuCodeWisePredefinedCapacity = container.getSkuCodeWisePredefinedCapacity();
+            this.creationTime = container.getCreationTime();
+            this.modifiedTime = container.getModifiedTime();
             return this;
         }
 
@@ -91,5 +110,13 @@ public class ContainerDTO {
         this.skuCodeWisePredefinedCapacity = b.skuCodeWisePredefinedCapacity;
         this.currentCapacity = b.currentCapacity;
         this.status = b.status;
+        this.creationTime = b.creationTime;
+        this.modifiedTime = b.modifiedTime;
+    }
+
+    public Container toDbEntity() {
+        Container container = Container.builder().containerId(this.containerId).warehouseId(this.warehouseId)
+                .creationTime(this.creationTime).modifiedTime(this.modifiedTime).skuCodeWisePredefinedCapacity(this.skuCodeWisePredefinedCapacity).build();
+        return container;
     }
 }

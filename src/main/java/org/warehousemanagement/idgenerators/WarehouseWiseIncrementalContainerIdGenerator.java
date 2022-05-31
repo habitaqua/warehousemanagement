@@ -1,6 +1,7 @@
 package org.warehousemanagement.idgenerators;
 
 import com.google.inject.Inject;
+import org.warehousemanagement.entities.container.ContainerDTO;
 import org.warehousemanagement.entities.dynamodb.Container;
 import org.warehousemanagement.entities.container.AddContainerRequest;
 import org.warehousemanagement.dao.ContainerDynamoDAOImpl;
@@ -23,7 +24,7 @@ public class WarehouseWiseIncrementalContainerIdGenerator implements ContainerId
     @Override
     public String generate(AddContainerRequest addContainerRequest) {
         String warehouseId = addContainerRequest.getWarehouseId();
-        Optional<Container> lastAddedContainer = containerDynamoDAOImpl.getLastAddedContainer(warehouseId);
+        Optional<ContainerDTO> lastAddedContainer = containerDynamoDAOImpl.getLastAddedContainer(warehouseId);
         if(lastAddedContainer.isPresent())
         {
             String containerId = lastAddedContainer.get().getContainerId();

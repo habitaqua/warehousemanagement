@@ -1,19 +1,21 @@
 package org.warehousemanagement.dao;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.*;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.ExpectedAttributeValue;
+import com.amazonaws.services.dynamodbv2.model.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.PaginatedResponse;
 import org.warehousemanagement.entities.container.ContainerDTO;
 import org.warehousemanagement.entities.container.GetContainerRequest;
 import org.warehousemanagement.entities.container.GetContainersRequest;
 import org.warehousemanagement.entities.dynamodb.Container;
-import org.warehousemanagement.entities.dynamodb.ContainerCapacity;
 import org.warehousemanagement.entities.exceptions.NonRetriableException;
+import org.warehousemanagement.entities.exceptions.ResourceAlreadyExistsException;
+import org.warehousemanagement.entities.exceptions.RetriableException;
 
 import java.time.Clock;
 import java.util.HashMap;
@@ -28,20 +30,17 @@ import java.util.stream.Collectors;
  * @author Laasya
  */
 @Slf4j
-public class ContainerDynamoDAOImpl implements ContainerDAO{
+public class ContainerDynamoDAOImpl implements ContainerDAO {
 
 
     DynamoDBMapper containerDynamoDbMapper;
 
-    ContainerCapacityDynamoDAOImpl containerCapacityDynamoDAOImpl;
     ObjectMapper objectMapper;
     Clock clock;
 
     @Inject
-    public ContainerDynamoDAOImpl(DynamoDBMapper containerDynamoDbMapper, ContainerCapacityDynamoDAOImpl containerCapacityDynamoDAOImpl,
-                                  Clock clock, ObjectMapper mapper) {
+    public ContainerDynamoDAOImpl(DynamoDBMapper containerDynamoDbMapper, Clock clock, ObjectMapper mapper) {
         this.containerDynamoDbMapper = containerDynamoDbMapper;
-        this.containerCapacityDynamoDAOImpl = containerCapacityDynamoDAOImpl;
         this.clock = clock;
         this.objectMapper = mapper;
     }
@@ -52,19 +51,16 @@ public class ContainerDynamoDAOImpl implements ContainerDAO{
         String warehouseId = getContainerRequest.getWarehouseId();
         String containerId = getContainerRequest.getContainerId();
         Container container = containerDynamoDbMapper.load(Container.class, warehouseId, containerId);
-        if(container == null) {
-           return Optional.empty();
+        if (container == null) {
+            return Optional.empty();
         }
         ContainerDTO.Builder containerDTOBuilder = new ContainerDTO.Builder().containerDetails(container);
-        Optional<ContainerCapacity> containerCapacity = containerCapacityDynamoDAOImpl.get(warehouseId, containerId);
-        if(containerCapacity.isPresent()) {
-            containerDTOBuilder.currentCapacityDetails(containerCapacity.get());
-        }
         return Optional.ofNullable(containerDTOBuilder.build());
     }
 
     /**
      * gets container details without current capacity
+     *
      * @param getContainersRequest
      * @return
      */
@@ -81,14 +77,13 @@ public class ContainerDynamoDAOImpl implements ContainerDAO{
 
                 Map<String, AttributeValue> exclusiveStartKey = objectMapper.readValue(getContainersRequest.getPageToken().get(), Map.class);
                 dynamoDBQueryExpression.withExclusiveStartKey(exclusiveStartKey);
-
             }
-            QueryResultPage<Container> locationQueryResultPage = containerDynamoDbMapper.queryPage(Container.class,
+            QueryResultPage<Container> containerQueryResultPage = containerDynamoDbMapper.queryPage(Container.class,
                     dynamoDBQueryExpression);
-            List<Container> containers = locationQueryResultPage.getResults();
+            List<Container> containers = containerQueryResultPage.getResults();
             List<ContainerDTO> containerDTOS = containers.stream().map(container -> new ContainerDTO.Builder().containerDetails(container).build())
                     .collect(Collectors.toList());
-            String nextPageToken = objectMapper.writeValueAsString(locationQueryResultPage.getLastEvaluatedKey());
+            String nextPageToken = objectMapper.writeValueAsString(containerQueryResultPage.getLastEvaluatedKey());
             PaginatedResponse<ContainerDTO> paginatedResponse = PaginatedResponse.<ContainerDTO>builder()
                     .items(containerDTOS).nextPageToken(nextPageToken).build();
             return paginatedResponse;
@@ -108,32 +103,57 @@ public class ContainerDynamoDAOImpl implements ContainerDAO{
      */
     public void add(ContainerDTO containerDTO) {
 
-        String containerId = containerDTO.getContainerId();
-        String warehouseId = containerDTO.getWarehouseId();
-        long time = clock.millis();
-        Container container = Container.builder().containerId(containerId)
-                .warehouseId(warehouseId).skuCodeWisePredefinedCapacity(containerDTO.getSkuCodeWisePredefinedCapacity())
-                .creationTime(time).modifiedTime(time).build();
-        DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
-        Map expected = new HashMap();
-        expected.put("warehouseId", new ExpectedAttributeValue(new AttributeValue().withS(warehouseId)).withExists(false));
-        expected.put("containerId", new ExpectedAttributeValue(new AttributeValue().withS(containerId)).withExists(false));
-        dynamoDBSaveExpression.setExpected(expected);
-        containerDynamoDbMapper.save(container,dynamoDBSaveExpression);
+        try {
+            Preconditions.checkArgument(containerDTO != null, "containerdto cannot be null");
+            String containerId = containerDTO.getContainerId();
+            String warehouseId = containerDTO.getWarehouseId();
+            long time = clock.millis();
+            Container container = Container.builder().containerId(containerId)
+                    .warehouseId(warehouseId).skuCodeWisePredefinedCapacity(containerDTO.getSkuCodeWisePredefinedCapacity())
+                    .creationTime(time).modifiedTime(time).build();
+            DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
+            Map expected = new HashMap();
+            expected.put("warehouseId", new ExpectedAttributeValue().withExists(false));
+            expected.put("containerId", new ExpectedAttributeValue().withExists(false));
+            dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
+            containerDynamoDbMapper.save(container, dynamoDBSaveExpression);
+        } catch (
+                InternalServerErrorException e) {
+            log.error("Retriable Error occured while starting inbound", e);
+            throw new RetriableException(e);
+        } catch (
+                ConditionalCheckFailedException ce) {
+            log.error("container id", containerDTO.getContainerId(), " already exist in given warehouse",
+                    containerDTO.getWarehouseId(), ce);
+            throw new ResourceAlreadyExistsException(ce);
+        } catch (Exception e) {
+            log.error("Non Retriable Error occured while starting inbound", e);
+            throw new NonRetriableException(e);
+        }
     }
 
-    public Optional<Container> getLastAddedContainer(String warehouseId) {
-        Map<String, AttributeValue> eav = new HashMap();
-        eav.put(":val1", new AttributeValue().withS(warehouseId));
-        DynamoDBQueryExpression<Container> dynamoDBQueryExpression = new DynamoDBQueryExpression<Container>()
-                .withKeyConditionExpression("warehouseId = :val1").withExpressionAttributeValues(eav)
-                .withScanIndexForward(false).withLimit(1).withConsistentRead(true);
-        PaginatedQueryList<Container> queryResponse = containerDynamoDbMapper.query(Container.class, dynamoDBQueryExpression);
-        Optional<Container> latestAddedContainer = queryResponse.stream().findAny();
-        if (latestAddedContainer.isPresent()) {
-            return latestAddedContainer;
-        } else {
-            return Optional.empty();
+    public Optional<ContainerDTO> getLastAddedContainer(String warehouseId) {
+        try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be null");
+            Map<String, AttributeValue> eav = new HashMap();
+            eav.put(":val1", new AttributeValue().withS(warehouseId));
+            DynamoDBQueryExpression<Container> dynamoDBQueryExpression = new DynamoDBQueryExpression<Container>()
+                    .withKeyConditionExpression("warehouseId = :val1").withExpressionAttributeValues(eav)
+                    .withScanIndexForward(false).withLimit(1).withConsistentRead(true);
+            PaginatedQueryList<Container> queryResponse = containerDynamoDbMapper.query(Container.class, dynamoDBQueryExpression);
+            Optional<Container> latestAddedContainer = queryResponse.stream().findAny();
+            if (latestAddedContainer.isPresent()) {
+                return Optional.of(new ContainerDTO.Builder().containerDetails(latestAddedContainer.get()).build());
+
+            } else {
+                return Optional.empty();
+            }
+        } catch (InternalServerErrorException e) {
+            log.error("Retriable Error occured while getting last inbound", e);
+            throw new RetriableException(e);
+        } catch (Exception e) {
+            log.error("Non Retriable Error occured while getting last inbound", e);
+            throw new NonRetriableException(e);
         }
     }
 
