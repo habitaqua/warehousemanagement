@@ -105,6 +105,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
      * @param warehouseId
      * @return
      */
+    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public Optional<FinishedGoodsInbound> getLastInbound(String warehouseId) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");

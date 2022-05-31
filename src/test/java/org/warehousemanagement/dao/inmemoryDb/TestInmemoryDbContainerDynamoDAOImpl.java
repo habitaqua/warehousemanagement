@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.assertj.core.api.*;
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -152,7 +153,8 @@ public class TestInmemoryDbContainerDynamoDAOImpl {
                 .containerId(expected.getContainerId()).build());
         new BooleanAssert(containerOp.isPresent()).isEqualTo(true);
         ContainerDTO actual = containerOp.get();
-        Assertions.assertThat(expected).usingRecursiveComparison().isEqualTo(actual);
+        Assertions.assertThat(expected).usingRecursiveComparison(RecursiveComparisonConfiguration.builder()
+                .withComparedFields("skuCodeWisePredefinedCapacity", "containerId","warehouseId").build()).isEqualTo(actual);
 
     }
 
@@ -206,7 +208,8 @@ public class TestInmemoryDbContainerDynamoDAOImpl {
         containerDynamoDAO.add(container2);
         Optional<ContainerDTO> containerOp = containerDynamoDAO.getLastAddedContainer(WAREHOUSE_1);
         ContainerDTO containerDTO = containerOp.get();
-        Assertions.assertThat(containerDTO).usingRecursiveComparison().isEqualTo(container2);
+        Assertions.assertThat(containerDTO).usingRecursiveComparison(RecursiveComparisonConfiguration.builder()
+                .withComparedFields("skuCodeWisePredefinedCapacity", "containerId","warehouseId").build()).isEqualTo(container2);
     }
 
     @Test

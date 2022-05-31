@@ -111,7 +111,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
 
         long startTime = clock.millis();
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         outboundDynamoDAO.add(outboundDTO);
         Assertions.assertThatExceptionOfType(ResourceAlreadyExistsException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO)).withCauseExactlyInstanceOf(ConditionalCheckFailedException.class);
@@ -123,11 +123,11 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
 
         long startTime = clock.millis();
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         OutboundDTO fgOutboundDTOSameWarehouseDiffOutbound = OutboundDTO.builder().outboundId(OUTBOUND_2).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         OutboundDTO fgOutboundDTODifferentWarehouseSameOutbound = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_2)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
 
         outboundDynamoDAO.add(outboundDTO);
         outboundDynamoDAO.add(fgOutboundDTOSameWarehouseDiffOutbound);
@@ -141,7 +141,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         long startTime = clock.millis();
         long endTime = startTime + 3;
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         outboundDynamoDAO.add(outboundDTO);
 
         OutboundDTO updatedFGOutboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
@@ -166,7 +166,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         long startTime = clock.millis();
         long endTime = startTime + 3;
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         outboundDynamoDAO.add(outboundDTO);
 
         OutboundDTO updatedOutboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).warehouseId(WAREHOUSE_1)
@@ -190,7 +190,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         long startTime = clock.millis();
         long endTime = startTime + 3;
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).customerId(CUSTOMER_ID).userId(USER_ID).build();
         outboundDynamoDAO.add(outboundDTO);
 
         OutboundDTO updatedOutboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_2).status(new Closed()).warehouseId(WAREHOUSE_1)
@@ -203,10 +203,10 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
 
         long startTime = clock.millis();
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .customerId(CUSTOMER_ID).startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
 
         OutboundDTO outboundDTO2 = OutboundDTO.builder().outboundId(OUTBOUND_2).status(new Active()).warehouseId(WAREHOUSE_1)
-                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
         outboundDynamoDAO.add(outboundDTO);
         outboundDynamoDAO.add(outboundDTO2);
         Optional<FinishedGoodsOutbound> lastOutboundOp = outboundDynamoDAO.getLastOutbound(WAREHOUSE_1);

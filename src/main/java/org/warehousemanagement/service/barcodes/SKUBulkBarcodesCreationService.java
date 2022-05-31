@@ -13,7 +13,8 @@ import com.itextpdf.layout.property.TextAlignment;
 import lombok.extern.slf4j.Slf4j;
 import org.warehousemanagement.entities.BarcodeDataDTO;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequestDTO;
-import org.warehousemanagement.dao.InventoryDynamoDbImpl;
+import org.warehousemanagement.idgenerators.ProductIdGenerator;
+import org.warehousemanagement.utils.Utilities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,36 +22,41 @@ import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Slf4j
 public class SKUBulkBarcodesCreationService {
 
-    public static final String BARCODE_INFO_DELIMITER = "<%>";
+    private static final String ALT_TEXT_DELIMITER = "-";
     Clock clock;
     BarcodesPersistor barcodesPersistor;
-    InventoryDynamoDbImpl InventoryDynamoDbImpl;
+
+    ProductIdGenerator<SKUBarcodesGenerationRequestDTO> productIdGenerator;
 
     @Inject
-    public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor,
-            InventoryDynamoDbImpl InventoryDynamoDbImpl) {
+    public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor
+            , ProductIdGenerator<SKUBarcodesGenerationRequestDTO> productIdGenerator) {
         this.clock = clock;
         this.barcodesPersistor = barcodesPersistor;
-        this.InventoryDynamoDbImpl = InventoryDynamoDbImpl;
+        this.productIdGenerator = productIdGenerator;
     }
 
     public String createBarcodesInBulk(SKUBarcodesGenerationRequestDTO skuBarcodesGenerationRequestDTO)
             throws FileNotFoundException {
-        List<BarcodeDataDTO> barcodesContent = createBarcodesContent(skuBarcodesGenerationRequestDTO);
+
+        List<String> generatedIds = productIdGenerator.generate(skuBarcodesGenerationRequestDTO);
         final String filePath = "/tmp/barcodes.pdf";
         File file = new File(filePath);
         file.getParentFile().mkdirs();
 
         PdfDocument pdfDoc = new PdfDocument(new PdfWriter(filePath));
+        List<BarcodeDataDTO> barcodesContent = createBarcodesDTO(skuBarcodesGenerationRequestDTO, generatedIds, pdfDoc);
+
         Document doc = new Document(pdfDoc);
         doc.setTextAlignment(TextAlignment.CENTER);
         barcodesContent.forEach(barcodeDataDTO -> {
-           // doc.add(addBarcodeToPdf(barcodeDataDTO, pdfDoc));
+            doc.add(addBarcodeToPdf(barcodeDataDTO));
             doc.add(new Paragraph());
 
         });
@@ -58,29 +64,23 @@ public class SKUBulkBarcodesCreationService {
         return barcodesPersistor.persistBarcodeFile(filePath);
     }
 
-    private List<BarcodeDataDTO> createBarcodesContent(SKUBarcodesGenerationRequestDTO request) {
-        int quantity = request.getQuantity();
-        List<BarcodeDataDTO> barcodeDataDTOS = new ArrayList<>();
-        IntStream.range(0, quantity).forEach(iteration ->
-                barcodeDataDTOS.add(BarcodeDataDTO.builder().valueToEncode(UUID.randomUUID().toString())
-                        .altText(request.getSkuCategory().toString()).build()));
+    private List<BarcodeDataDTO> createBarcodesDTO(SKUBarcodesGenerationRequestDTO request, List<String> uniqueIds,
+                                                   PdfDocument pdfDoc) {
+        List<BarcodeDataDTO> barcodeDataDTOS =
+        uniqueIds.stream().map(id->BarcodeDataDTO.builder().valueToEncode(id).pdfDocument(pdfDoc)
+                .altText(String.join(ALT_TEXT_DELIMITER,request.getSkuCategory().getValue(),
+                        request.getSkuType().getValue())).build()).collect(Collectors.toList());
+
         return barcodeDataDTOS;
     }
 
- /*   private Paragraph addBarcodeToPdf(BarcodeDataDTO skuBarcodeDataDTO,
-            PdfDocument pdfDoc) {
-        String skuCategory = skuBarcodeDataDTO.getSkuCategory().name();
-        String skuType = skuBarcodeDataDTO.getSkuType().name();
-        String skuId = skuBarcodeDataDTO.getSkuId();
+    private Paragraph addBarcodeToPdf(BarcodeDataDTO barcodeDataDTO) {
 
-        String valueToEncode = String.join(ALT_TEXT_DELIMITER,skuId, skuCategory, skuType);
-        Barcode128 barcode = new Barcode128(pdfDoc);
-        barcode.setAltText(String.join(ALT_TEXT_DELIMITER, skuCategory, skuType));
-        barcode.setCodeType(Barcode128.CODE128);
-        barcode.setCode(valueToEncode);
-        PdfFormXObject barcodeObject = barcode.createFormXObject(null, null, pdfDoc);
+        Barcode128 barcode128 = Utilities.createBarcode128(barcodeDataDTO);
+        PdfFormXObject barcodeObject = barcode128.createFormXObject(null, null,
+                barcodeDataDTO.getPdfDocument());
         Paragraph paragraph = new Paragraph().add(new Image(barcodeObject));
         return paragraph;
-    }*/
+    }
 }
 

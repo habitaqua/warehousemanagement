@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.PaginatedQueryList;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.jcabi.aspects.RetryOnFailure;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.warehousemanagement.entities.dynamodb.FinishedGoodsOutbound;
@@ -33,6 +34,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         this.outboundDynamoDbMapper = outboundDynamoDbMapper;
     }
 
+    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void add(OutboundDTO outboundDTO) {
         try {
             Preconditions.checkArgument(outboundDTO != null, "outboundDTO cannot be null");
@@ -62,6 +64,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         }
     }
 
+    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void update(OutboundDTO outboundDTO) {
         try {
             Preconditions.checkArgument(outboundDTO != null, "fgInboundDTO cannot be null");
@@ -93,6 +96,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         }
     }
 
+    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public Optional<FinishedGoodsOutbound> getLastOutbound(String warehouseId) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
