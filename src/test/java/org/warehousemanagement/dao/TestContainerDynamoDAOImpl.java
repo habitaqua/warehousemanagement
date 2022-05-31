@@ -34,7 +34,7 @@ import java.util.Optional;
 public class TestContainerDynamoDAOImpl {
 
 
-    private static final String CONTAINER_1 = "INBOUND-1";
+    private static final String CONTAINER_1 = "CONTAINER-1";
 
     private static final String WAREHOUSE_1 = "WAREHOUSE-1";
 

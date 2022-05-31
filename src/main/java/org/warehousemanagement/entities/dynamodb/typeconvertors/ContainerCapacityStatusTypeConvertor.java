@@ -3,9 +3,9 @@ package org.warehousemanagement.entities.dynamodb.typeconvertors;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
 import org.warehousemanagement.entities.container.containerstatus.*;
 
-public class LocationStatusTypeConvertor implements DynamoDBTypeConverter<ContainerStatus, String> {
+public class ContainerCapacityStatusTypeConvertor implements DynamoDBTypeConverter<String, ContainerStatus> {
     @Override
-    public ContainerStatus convert(String locationStatusString) {
+    public ContainerStatus unconvert(String locationStatusString) {
         switch (locationStatusString) {
             case "AVAILABLE":
                 return new Available();
@@ -21,7 +21,7 @@ public class LocationStatusTypeConvertor implements DynamoDBTypeConverter<Contai
     }
 
     @Override
-    public String unconvert(ContainerStatus containerStatus) {
+    public String convert(ContainerStatus containerStatus) {
         return containerStatus.getStatus();
     }
 }

@@ -4,12 +4,8 @@ import com.amazonaws.services.dynamodbv2.datamodeling.*;
 import com.google.common.base.Preconditions;
 import lombok.*;
 import org.apache.commons.lang3.StringUtils;
-import org.warehousemanagement.entities.dynamodb.typeconvertors.LocationStatusTypeConvertor;
-import org.warehousemanagement.entities.dynamodb.typeconvertors.SKUWiseCapacityConvertor;
+import org.warehousemanagement.entities.dynamodb.typeconvertors.ContainerCapacityStatusTypeConvertor;
 import org.warehousemanagement.entities.container.containerstatus.ContainerStatus;
-import org.warehousemanagement.utils.Utilities;
-
-import java.util.Map;
 
 /**
  * Dynamodb entory for a container which can hold the skus.
@@ -31,7 +27,7 @@ public class ContainerCapacity {
     int currentCapacity;
 
     @DynamoDBAttribute(attributeName = "status")
-    @DynamoDBTypeConverted(converter = LocationStatusTypeConvertor.class)
+    @DynamoDBTypeConverted(converter = ContainerCapacityStatusTypeConvertor.class)
     ContainerStatus status;
 
     @DynamoDBAttribute(attributeName = "creationTime")
@@ -46,7 +42,7 @@ public class ContainerCapacity {
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseContainerId), "warehouseContainerId cannot be blank");
         Preconditions.checkArgument(currentCapacity >= 0,
                 "current capacity not in range");
-        Preconditions.checkArgument(status != null, "location status cannot be null");
+        Preconditions.checkArgument(status != null, "container capacity status cannot be null");
         Preconditions.checkArgument(creationTime != null, "creationTime cannot be null");
         Preconditions.checkArgument(modifiedTime != null, "modified cannot be null");
 
