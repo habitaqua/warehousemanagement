@@ -34,6 +34,7 @@ import org.warehousemanagement.entities.inventory.InventoryOutboundRequest;
 import org.warehousemanagement.entities.inventory.inventorystatus.Inbound;
 import org.warehousemanagement.entities.inventory.inventorystatus.Outbound;
 import org.warehousemanagement.entities.inventory.inventorystatus.Production;
+import org.warehousemanagement.helpers.ContainerStatusDeterminer;
 import org.warehousemanagement.testutils.LocalDbCreationRule;
 import org.warehousemanagement.testutils.Utilities;
 
@@ -47,26 +48,23 @@ import static org.warehousemanagement.testutils.Utilities.*;
 public class TestInmemoryDbInventoryDynamoDAOImpl {
 
 
-    public static final String SKU_TYPE = "sku-type";
+    private static final String SKU_TYPE = "sku-type";
     private static final String INBOUND_1 = "INBOUND-1";
-    private static final String INBOUND_2 = "INBOUND-2";
-
     private static final String WAREHOUSE_1 = "WAREHOUSE-1";
     private static final String COMPANY_1 = "COMPANY-1";
     private static final String COMPANY_2 = "COMPANY-2";
 
-
     private static final String CONTAINER_1 = "CONTAINER-1";
-    public static final String SKU_CODE = "sku-code";
-    public static final String SKU_CATEGORY = "sku-category";
-    public static final ImmutableList<String> UNIQUE_PRODUCT_IDS_1 = ImmutableList.of("1", "2", "3", "4");
-    public static final ImmutableList<String> UNIQUE_PRODUCT_IDS_2 = ImmutableList.of("5", "6", "7", "8");
+    private static final String SKU_CODE = "sku-code";
+    private static final String SKU_CATEGORY = "sku-category";
+    private static final ImmutableList<String> UNIQUE_PRODUCT_IDS_1 = ImmutableList.of("1", "2", "3", "4");
+    private static final ImmutableList<String> UNIQUE_PRODUCT_IDS_2 = ImmutableList.of("5", "6", "7", "8");
 
-    public static final String INVENTORY_TABLE_NAME = "inventory";
-    public static final String DELIMITER = "<%>";
-    public static final String OUTBOUND_1 = "OUTBOUND-1";
-    public static final int CONTAINER_MAX_CAPACITY = 5;
-    public static final String ORDER_1 = "ORDER-1";
+    private static final String INVENTORY_TABLE_NAME = "inventory";
+    private static final String DELIMITER = "<%>";
+    private static final String OUTBOUND_1 = "OUTBOUND-1";
+    private static final int CONTAINER_MAX_CAPACITY = 5;
+    private static final String ORDER_1 = "ORDER-1";
 
     @ClassRule
     public static LocalDbCreationRule dynamoDB = new LocalDbCreationRule();
@@ -77,6 +75,8 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
     ContainerCapacityDAO containerCapacityDAO;
 
     Clock clock;
+
+    ContainerStatusDeterminer containerStatusDeterminer;
 
     DynamoDBMapperConfig dynamoDBMapperConfig;
 
@@ -93,9 +93,10 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         dynamoDBMapperConfig = DynamoDBMapperConfig.builder()
                 .withConsistentReads(DynamoDBMapperConfig.ConsistentReads.CONSISTENT).withSaveBehavior(DynamoDBMapperConfig.SaveBehavior.UPDATE_SKIP_NULL_ATTRIBUTES).build();
         dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB, dynamoDBMapperConfig);
+        containerStatusDeterminer = new ContainerStatusDeterminer();
         clock = Clock.systemUTC();
         containerCapacityDAO = new ContainerCapacityDynamoDAOImpl(dynamoDBMapper, clock);
-        inventoryDynamoDAO = new InventoryDynamoDAOImpl(amazonDynamoDB, dynamoDBMapper, containerCapacityDAO, clock);
+        inventoryDynamoDAO = new InventoryDynamoDAOImpl(amazonDynamoDB, dynamoDBMapper, containerStatusDeterminer, containerCapacityDAO, clock);
 
         try {
             CreateTableRequest tableRequestInventory = dynamoDBMapper.generateCreateTableRequest(Inventory.class);
@@ -392,7 +393,6 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new IntegerAssert(containerCapacityAfterPartialInbound.get().getCurrentCapacity()).isEqualTo(4);
 
 
-
         InventoryInboundRequest fullInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(ImmutableList.of("5")).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         inventoryDynamoDAO.inbound(fullInboundRequest);
@@ -421,7 +421,6 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new StringAssert(containerCapacityAfterFullOutbound.get().getContainerStatus().getStatus()).isEqualTo(new Available().getStatus());
         new IntegerAssert(containerCapacityAfterFullOutbound.get().getCurrentCapacity()).isEqualTo(0);
     }
-
 
 
 }

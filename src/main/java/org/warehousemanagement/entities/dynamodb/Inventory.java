@@ -62,7 +62,6 @@ public class Inventory {
                 " cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(skuCategoryType), "skuCategoryType cannot be blank");
         Preconditions.checkArgument(inventoryStatus != null, "inventoryStatus cannot be null");
         Preconditions.checkArgument(creationTime != null, "creationTime cannot be null");

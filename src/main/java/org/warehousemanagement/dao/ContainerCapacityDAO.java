@@ -9,6 +9,8 @@ public interface ContainerCapacityDAO {
 
     Optional<ContainerCapacity> get(String warehouseId, String containerId);
 
+    int getExistingQuantity(String warehouseId, String containerId);
+
     void init(String warehouseId, String containerId);
 
 }

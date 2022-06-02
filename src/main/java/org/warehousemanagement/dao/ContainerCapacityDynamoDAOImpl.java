@@ -51,6 +51,16 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
         }
     }
 
+    public int getExistingQuantity(String warehouseId, String containerId) {
+        Optional<ContainerCapacity> containerCapacityOptional = this.get(warehouseId, containerId);
+        int existingQuantity = 0;
+        if (containerCapacityOptional.isPresent()) {
+            ContainerCapacity containerCapacity = containerCapacityOptional.get();
+            existingQuantity = containerCapacity.getCurrentCapacity();
+        }
+        return existingQuantity;
+    }
+
     public void init(String warehouseId, String containerId) {
 
         try {

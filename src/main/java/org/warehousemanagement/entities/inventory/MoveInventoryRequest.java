@@ -18,6 +18,8 @@ public class MoveInventoryRequest {
 
     String warehouseId;
 
+    String companyId;
+
     String skuCode;
 
     int sourceContainerMaxCapacity;
@@ -25,13 +27,14 @@ public class MoveInventoryRequest {
 
 
     @Builder
-    private MoveInventoryRequest(List<String> uniqueProductIds, String sourceContainerId,String skuCode,
+    private MoveInventoryRequest(List<String> uniqueProductIds, String sourceContainerId,String skuCode,String companyId,
                                  String destinationContainerId, String warehouseId, Integer sourceContainerMaxCapacity, Integer destinationContainerMaxCapacity) {
 
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(uniqueProductIds), "uniqueProductIds cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(sourceContainerId), "sourceLocationId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(destinationContainerId), "destinationLocationId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "locationId cannot be blank");
         Preconditions.checkArgument(sourceContainerMaxCapacity != null && sourceContainerMaxCapacity> 0 , "sourceContainerMaxCapacity cannot be < 0");
         Preconditions.checkArgument(destinationContainerMaxCapacity != null && destinationContainerMaxCapacity> 0 , "destinationContainerMaxCapacity cannot be < 0");
@@ -41,6 +44,7 @@ public class MoveInventoryRequest {
         this.sourceContainerId = sourceContainerId;
         this.destinationContainerId = destinationContainerId;
         this.warehouseId = warehouseId;
+        this.companyId = companyId;
         this.skuCode = skuCode;
         this.sourceContainerMaxCapacity = sourceContainerMaxCapacity;
         this.destinationContainerMaxCapacity = destinationContainerMaxCapacity;

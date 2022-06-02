@@ -25,7 +25,6 @@ public class ContainerCapacityService {
         return containerCapacityDAO.get(warehouseId, containerId);
     }
 
-
     public void initialize(String warehouseId, String containerId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");
