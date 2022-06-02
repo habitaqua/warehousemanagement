@@ -34,7 +34,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         this.outboundDynamoDbMapper = outboundDynamoDbMapper;
     }
 
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void add(OutboundDTO outboundDTO) {
         try {
             Preconditions.checkArgument(outboundDTO != null, "outboundDTO cannot be null");
@@ -64,7 +63,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         }
     }
 
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void update(OutboundDTO outboundDTO) {
         try {
             Preconditions.checkArgument(outboundDTO != null, "fgInboundDTO cannot be null");
@@ -96,7 +94,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
         }
     }
 
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public Optional<FinishedGoodsOutbound> getLastOutbound(String warehouseId) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");

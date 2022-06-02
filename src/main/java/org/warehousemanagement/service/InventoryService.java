@@ -2,14 +2,12 @@ package org.warehousemanagement.service;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import com.jcabi.aspects.RetryOnFailure;
 import org.warehousemanagement.dao.InventoryDAO;
 import org.warehousemanagement.entities.container.ContainerDTO;
 import org.warehousemanagement.entities.container.GetContainerRequest;
 import org.warehousemanagement.entities.exceptions.NonRetriableException;
-import org.warehousemanagement.entities.exceptions.RetriableException;
-import org.warehousemanagement.entities.inventory.AddInventoryRequest;
-import org.warehousemanagement.entities.inventory.FulfillInventoryRequest;
+import org.warehousemanagement.entities.inventory.InventoryInboundRequest;
+import org.warehousemanagement.entities.inventory.InventoryOutboundRequest;
 import org.warehousemanagement.entities.inventory.MoveInventoryRequest;
 
 import java.util.List;
@@ -35,47 +33,45 @@ public class InventoryService {
 
 
     //TODO USING SEQUENTIAL . CHECK PERF AND DECIDE MULTI THREADING
-    @RetryOnFailure(attempts = RETRY_ATTEMPTS, delay = RETRY_DELAY, types = RetriableException.class)
-    public void add(AddInventoryRequest addInventoryRequest) {
+    public void add(InventoryInboundRequest inventoryInboundRequest) {
 
-        String containerId = addInventoryRequest.getContainerId();
-        String warehouseId = addInventoryRequest.getWarehouseId();
+        String containerId = inventoryInboundRequest.getContainerId();
+        String warehouseId = inventoryInboundRequest.getWarehouseId();
         ContainerDTO containerDTO = containerService.getContainer(GetContainerRequest.builder().containerId(containerId)
                 .warehouseId(warehouseId).build());
         int existingCapacity = containerDTO.getCurrentCapacity();
-        int deltaCapacity = addInventoryRequest.getUniqueProductIds().size();
-        int maxCapacity = containerDTO.getSkuCodeWisePredefinedCapacity().get(addInventoryRequest.getSkuCode());
+        int deltaCapacity = inventoryInboundRequest.getUniqueProductIds().size();
+        int maxCapacity = containerDTO.getSkuCodeWisePredefinedCapacity().get(inventoryInboundRequest.getSkuCode());
         if (existingCapacity + deltaCapacity > maxCapacity) {
             throw new NonRetriableException("Container max capacity reached");
         }
-        List<List<String>> uniqueProductIdsSubList = Lists.partition(addInventoryRequest.getUniqueProductIds(), ADD_SUBLIST_SIZE);
-        List<AddInventoryRequest> partitionedAddInventoryRequests = uniqueProductIdsSubList.stream().map(list -> AddInventoryRequest.builder().uniqueProductIds(list)
-                .inventoryStatus(addInventoryRequest.getInventoryStatus()).containerId(containerId)
-                .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).inboundId(addInventoryRequest.getInboundId())
-                .skuCode(addInventoryRequest.getSkuCode()).build()).collect(Collectors.toList());
-        partitionedAddInventoryRequests.forEach(partitionedAddInventoryRequest -> inventoryDAO.add(partitionedAddInventoryRequest));
+        List<List<String>> uniqueProductIdsSubList = Lists.partition(inventoryInboundRequest.getUniqueProductIds(), ADD_SUBLIST_SIZE);
+        List<InventoryInboundRequest> partitionedInventoryInboundRequests = uniqueProductIdsSubList.stream().map(list -> InventoryInboundRequest.builder().uniqueProductIds(list)
+                .inventoryStatus(inventoryInboundRequest.getInventoryStatus()).containerId(containerId)
+                .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).inboundId(inventoryInboundRequest.getInboundId())
+                .skuCode(inventoryInboundRequest.getSkuCode()).build()).collect(Collectors.toList());
+        partitionedInventoryInboundRequests.forEach(partitionedInventoryInboundRequest -> inventoryDAO.inbound(partitionedInventoryInboundRequest));
     }
 
-    @RetryOnFailure(attempts = RETRY_ATTEMPTS, delay = RETRY_DELAY, types = RetriableException.class)
-    public void fulfill(FulfillInventoryRequest fulfillInventoryRequest) {
+    public void fulfill(InventoryOutboundRequest inventoryOutboundRequest) {
 
-        String containerId = fulfillInventoryRequest.getContainerId();
-        String warehouseId = fulfillInventoryRequest.getWarehouseId();
+        String containerId = inventoryOutboundRequest.getContainerId();
+        String warehouseId = inventoryOutboundRequest.getWarehouseId();
         ContainerDTO containerDTO = containerService.getContainer(GetContainerRequest.builder().containerId(containerId)
                 .warehouseId(warehouseId).build());
         int existingCapacity = containerDTO.getCurrentCapacity();
-        int deltaCapacity = fulfillInventoryRequest.getUniqueProductIds().size();
-        int maxCapacity = containerDTO.getSkuCodeWisePredefinedCapacity().get(fulfillInventoryRequest.getSkuCode());
+        int deltaCapacity = inventoryOutboundRequest.getUniqueProductIds().size();
+        int maxCapacity = containerDTO.getSkuCodeWisePredefinedCapacity().get(inventoryOutboundRequest.getSkuCode());
         if (existingCapacity - deltaCapacity < 0) {
             throw new NonRetriableException("fulfill exceeded container capacity");
         }
-        List<List<String>> uniqueProductIdsSubList = Lists.partition(fulfillInventoryRequest.getUniqueProductIds(), FULFILL_SUBLIST_SIZE);
-        List<FulfillInventoryRequest> partitionedFulfillInventoryRequests = uniqueProductIdsSubList.stream().map(list -> FulfillInventoryRequest.builder()
+        List<List<String>> uniqueProductIdsSubList = Lists.partition(inventoryOutboundRequest.getUniqueProductIds(), FULFILL_SUBLIST_SIZE);
+        List<InventoryOutboundRequest> partitionedInventoryOutboundRequests = uniqueProductIdsSubList.stream().map(list -> InventoryOutboundRequest.builder()
                 .uniqueProductIds(list)
-                .inventoryStatus(fulfillInventoryRequest.getInventoryStatus()).containerId(containerId)
-                .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).outboundId(fulfillInventoryRequest.getOutboundId())
-                .orderId(fulfillInventoryRequest.getOrderId()).skuCode(fulfillInventoryRequest.getSkuCode()).build()).collect(Collectors.toList());
-        partitionedFulfillInventoryRequests.forEach(partitionedFulfillInventoryRequest -> inventoryDAO.fulfill(partitionedFulfillInventoryRequest));
+                .inventoryStatus(inventoryOutboundRequest.getInventoryStatus()).containerId(containerId)
+                .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).outboundId(inventoryOutboundRequest.getOutboundId())
+                .orderId(inventoryOutboundRequest.getOrderId()).skuCode(inventoryOutboundRequest.getSkuCode()).build()).collect(Collectors.toList());
+        partitionedInventoryOutboundRequests.forEach(partitionedInventoryOutboundRequest -> inventoryDAO.outbound(partitionedInventoryOutboundRequest));
     }
     public void moveInventory(MoveInventoryRequest moveInventoryRequest) {
         String sourceContainerId = moveInventoryRequest.getSourceContainerId();

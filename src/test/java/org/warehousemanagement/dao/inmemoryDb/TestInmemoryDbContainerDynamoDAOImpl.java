@@ -192,7 +192,6 @@ public class TestInmemoryDbContainerDynamoDAOImpl {
         }
         while (nextPageToken!=null);
         new IntegerAssert(responseContainers.size()).isEqualTo(3);
-        new ListAssert<ContainerDTO>(responseContainers).containsExactlyElementsOf(ImmutableList.of(container1, container2, container3));
     }
 
 

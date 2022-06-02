@@ -1,29 +1,33 @@
 package org.warehousemanagement.dao;
 
-import org.warehousemanagement.entities.inventory.AddInventoryRequest;
-import org.warehousemanagement.entities.inventory.FulfillInventoryRequest;
+import org.warehousemanagement.entities.inventory.InventoryAddRequest;
+import org.warehousemanagement.entities.inventory.InventoryInboundRequest;
+import org.warehousemanagement.entities.inventory.InventoryOutboundRequest;
 import org.warehousemanagement.entities.inventory.MoveInventoryRequest;
+
+import java.util.List;
 
 public interface InventoryDAO {
 
 
 
+    List<String> add(InventoryAddRequest inventoryAddRequest);
 
     /**
      * idempotent for upi using InventoryStatus
      * transact write of adding inventory item and changing location capacity.
      *
-     * @param addInventoryRequest
+     * @param inventoryInboundRequest
      */
-     void add(AddInventoryRequest addInventoryRequest);
+     void inbound(InventoryInboundRequest inventoryInboundRequest);
 
     /**
      * idempotent for upi using InventoryStatus
      * transact write of adding inventory item and changing location capacity.
      *
-     * @param fulfillInventoryRequest
+     * @param inventoryOutboundRequest
      */
-     void fulfill(FulfillInventoryRequest fulfillInventoryRequest);
+     void outbound(InventoryOutboundRequest inventoryOutboundRequest);
 
 
      void move(MoveInventoryRequest moveInventoryRequest);

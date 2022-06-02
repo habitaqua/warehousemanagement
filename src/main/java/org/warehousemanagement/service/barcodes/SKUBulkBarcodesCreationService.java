@@ -1,5 +1,6 @@
 package org.warehousemanagement.service.barcodes;
 
+import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import com.itextpdf.barcodes.Barcode128;
@@ -11,9 +12,17 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.property.TextAlignment;
 import lombok.extern.slf4j.Slf4j;
+import org.warehousemanagement.dao.InventoryDAO;
 import org.warehousemanagement.entities.BarcodeDataDTO;
-import org.warehousemanagement.entities.SKUBarcodesGenerationRequestDTO;
+import org.warehousemanagement.entities.SKUBarcodesGenerationRequest;
+import org.warehousemanagement.entities.UniqueProductIdsGenerationRequestDTO;
+import org.warehousemanagement.entities.exceptions.NonRetriableException;
+import org.warehousemanagement.entities.exceptions.RetriableException;
+import org.warehousemanagement.entities.inventory.InventoryAddRequest;
+import org.warehousemanagement.entities.inventory.inventorystatus.Production;
+import org.warehousemanagement.entities.sku.SKU;
 import org.warehousemanagement.idgenerators.ProductIdGenerator;
+import org.warehousemanagement.service.SKUService;
 import org.warehousemanagement.utils.Utilities;
 
 import java.io.File;
@@ -21,55 +30,103 @@ import java.io.FileNotFoundException;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Slf4j
 public class SKUBulkBarcodesCreationService {
 
-    private static final String ALT_TEXT_DELIMITER = "-";
+    private static final String DELIMITER = "-";
+    private static final int BATCH_SAVE_SIZE = 25;
+    SKUService skuService;
+    InventoryDAO inventoryDAO;
+    ExecutorService executorService;
     Clock clock;
     BarcodesPersistor barcodesPersistor;
+    ProductIdGenerator<UniqueProductIdsGenerationRequestDTO> productIdGenerator;
+    String filePath;
 
-    ProductIdGenerator<SKUBarcodesGenerationRequestDTO> productIdGenerator;
 
     @Inject
-    public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor
-            , ProductIdGenerator<SKUBarcodesGenerationRequestDTO> productIdGenerator) {
+    public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor,
+                                          ProductIdGenerator<UniqueProductIdsGenerationRequestDTO> productIdGenerator, InventoryDAO inventoryDAO,
+                                          SKUService skuService, String filePath, ExecutorService executorService) {
         this.clock = clock;
         this.barcodesPersistor = barcodesPersistor;
         this.productIdGenerator = productIdGenerator;
+        this.inventoryDAO = inventoryDAO;
+        this.filePath = filePath;
+        this.executorService = executorService;
+        this.skuService = skuService;
     }
 
-    public String createBarcodesInBulk(SKUBarcodesGenerationRequestDTO skuBarcodesGenerationRequestDTO)
-            throws FileNotFoundException {
+    public String generate(SKUBarcodesGenerationRequest request) {
+        try {
+            String companyId = request.getCompanyId();
+            String skuCode = request.getSkuCode();
+            SKU sku = skuService.get(companyId, skuCode);
+            long productionTime = clock.millis();
+            String skuCategory = sku.getSkuCategory();
+            String skuType = sku.getSkuType();
+            UniqueProductIdsGenerationRequestDTO productIdsRequestDTO = UniqueProductIdsGenerationRequestDTO.builder()
+                    .skuCategory(skuCategory).skuCode(sku.getSkuCode()).skuType(skuType)
+                    .warehouseId(request.getWarehouseId()).companyId(request.getCompanyId()).productionTime(productionTime)
+                    .quantity(request.getQuantity()).build();
+            List<String> generatedProductIds = productIdGenerator.generate(productIdsRequestDTO);
 
-        List<String> generatedIds = productIdGenerator.generate(skuBarcodesGenerationRequestDTO);
-        final String filePath = "/tmp/barcodes.pdf";
-        File file = new File(filePath);
-        file.getParentFile().mkdirs();
+            List<String> successfulProductIds = addProductIdsToInventory(productIdsRequestDTO, generatedProductIds);
 
-        PdfDocument pdfDoc = new PdfDocument(new PdfWriter(filePath));
-        List<BarcodeDataDTO> barcodesContent = createBarcodesDTO(skuBarcodesGenerationRequestDTO, generatedIds, pdfDoc);
+            File file = new File(filePath);
+            file.getParentFile().mkdirs();
 
-        Document doc = new Document(pdfDoc);
-        doc.setTextAlignment(TextAlignment.CENTER);
-        barcodesContent.forEach(barcodeDataDTO -> {
-            doc.add(addBarcodeToPdf(barcodeDataDTO));
-            doc.add(new Paragraph());
+            PdfDocument pdfDoc = new PdfDocument(new PdfWriter(filePath));
+            List<BarcodeDataDTO> barcodesContent = createBarcodesDTO(successfulProductIds, skuCategory, skuType, pdfDoc);
 
-        });
-        doc.close();
-        return barcodesPersistor.persistBarcodeFile(filePath);
+            Document doc = new Document(pdfDoc);
+            doc.setTextAlignment(TextAlignment.CENTER);
+            barcodesContent.forEach(barcodeDataDTO -> {
+                doc.add(addBarcodeToPdf(barcodeDataDTO));
+                doc.add(new Paragraph());
+
+            });
+            doc.close();
+
+            return barcodesPersistor.persistBarcodeFile(filePath);
+        } catch (InterruptedException e) {
+            throw new RetriableException(e);
+        } catch (ExecutionException e) {
+            throw new RetriableException(e);
+        } catch (FileNotFoundException e) {
+            throw new NonRetriableException(e);
+        }
     }
 
-    private List<BarcodeDataDTO> createBarcodesDTO(SKUBarcodesGenerationRequestDTO request, List<String> uniqueIds,
+    private List<String> addProductIdsToInventory(UniqueProductIdsGenerationRequestDTO idsRequestDTO, List<String> generatedIds) throws InterruptedException, ExecutionException {
+        List<CompletableFuture<List<String>>> completableFutures = Lists.partition(generatedIds, BATCH_SAVE_SIZE).stream()
+                .map(subIds -> CompletableFuture.supplyAsync(() -> {
+                    InventoryAddRequest inventoryAddRequest = InventoryAddRequest.builder().uniqueProductIds(subIds)
+                            .inventoryStatus(new Production()).productionTime(idsRequestDTO.getProductionTime())
+                            .skuCategory(idsRequestDTO.getSkuCategory().getValue()).skuCode(idsRequestDTO.getSkuCode())
+                            .skuType(idsRequestDTO.getSkuType().getValue()).warehouseId(idsRequestDTO.getWarehouseId())
+                            .companyId(idsRequestDTO.getCompanyId()).build();
+                    return inventoryDAO.add(inventoryAddRequest);
+                }, executorService)).collect(Collectors.toList());
+
+        CompletableFuture.allOf(completableFutures.toArray(new CompletableFuture[0])).join();
+        List<String> successfulProductIds = new ArrayList<>();
+        for (CompletableFuture<List<String>> completableFuture : completableFutures) {
+            successfulProductIds.addAll(completableFuture.get());
+        }
+        return successfulProductIds;
+    }
+
+    private List<BarcodeDataDTO> createBarcodesDTO(List<String> uniqueIds, String skuCategory, String skuType,
                                                    PdfDocument pdfDoc) {
         List<BarcodeDataDTO> barcodeDataDTOS =
-        uniqueIds.stream().map(id->BarcodeDataDTO.builder().valueToEncode(id).pdfDocument(pdfDoc)
-                .altText(String.join(ALT_TEXT_DELIMITER,request.getSkuCategory().getValue(),
-                        request.getSkuType().getValue())).build()).collect(Collectors.toList());
+                uniqueIds.stream().map(id -> BarcodeDataDTO.builder().valueToEncode(id).pdfDocument(pdfDoc)
+                        .altText(String.join(DELIMITER, skuCategory, skuType)).build()).collect(Collectors.toList());
 
         return barcodeDataDTOS;
     }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequest;
-import org.warehousemanagement.entities.SKUBarcodesGenerationRequestDTO;
+import org.warehousemanagement.entities.UniqueProductIdsGenerationRequestDTO;
 import org.warehousemanagement.guice.MainModule;
 import org.warehousemanagement.service.barcodes.SKUBulkBarcodesCreationService;
 
@@ -18,6 +18,7 @@ public class BulkBarcodesGenerationHandler implements RequestHandler<Map<String,
     private SKUBulkBarcodesCreationService SKUBulkBarcodesCreationService;
     private ObjectMapper objectMapper;
     private Injector injector;
+
 
     public BulkBarcodesGenerationHandler() {
         System.out.println("injection started");
@@ -35,14 +36,11 @@ public class BulkBarcodesGenerationHandler implements RequestHandler<Map<String,
     public APIGatewayProxyResponseEvent handleRequest(Map<String, Object> input, Context context) {
 
         try {
-            SKUBarcodesGenerationRequest skuBarcodesGenerationRequest = objectMapper.readValue(String.valueOf(input.get(
-                    "body")),
+            SKUBarcodesGenerationRequest request = objectMapper.readValue(String.valueOf(input.get("body")),
                     SKUBarcodesGenerationRequest.class);
 
-            SKUBarcodesGenerationRequestDTO barcodesGenerationRequestDTO =
-                    SKUBarcodesGenerationRequestDTO.from(skuBarcodesGenerationRequest);
 
-            String downloadURL = SKUBulkBarcodesCreationService.createBarcodesInBulk(barcodesGenerationRequestDTO);
+            String downloadURL = SKUBulkBarcodesCreationService.generate(request);
 
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)

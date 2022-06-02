@@ -6,7 +6,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapperConfig;
 import com.amazonaws.services.dynamodbv2.model.*;
-import com.google.common.collect.ImmutableMap;
 import org.assertj.core.api.*;
 import org.junit.After;
 import org.junit.Before;
@@ -21,7 +20,6 @@ import org.warehousemanagement.testutils.LocalDbCreationRule;
 import org.warehousemanagement.testutils.Utilities;
 
 import java.time.Clock;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -83,7 +81,7 @@ public class TestInmemoryDbContainerCapacityDynamoDAOImpl {
     public void test_get_present_success() {
         long millis = clock.millis();
         ContainerCapacity containerCapacityExpected = ContainerCapacity.builder().warehouseContainerId(String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1))
-                .modifiedTime(millis).currentCapacity(10).creationTime(millis).status(new PartiallyFilled()).build();
+                .modifiedTime(millis).currentCapacity(10).creationTime(millis).containerStatus(new PartiallyFilled()).build();
         dynamoDBMapper.save(containerCapacityExpected);
         Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDynamoDAO.get(WAREHOUSE_1, CONTAINER_1);
         new BooleanAssert(containerCapacityActualOp.isPresent()).isEqualTo(true);
@@ -105,7 +103,7 @@ public class TestInmemoryDbContainerCapacityDynamoDAOImpl {
         new StringAssert(warehouseContainerId[0]).isEqualTo(WAREHOUSE_1);
         new StringAssert(warehouseContainerId[1]).isEqualTo(CONTAINER_1);
         new IntegerAssert(actualContainerCapacity.getCurrentCapacity()).isEqualTo(0);
-        new StringAssert(actualContainerCapacity.getStatus().getStatus()).isEqualTo(new Available().getStatus());
+        new StringAssert(actualContainerCapacity.getContainerStatus().getStatus()).isEqualTo(new Available().getStatus());
         new IntegerAssert(warehouseContainerId.length).isEqualTo(2);
         new LongAssert(actualContainerCapacity.getCreationTime()).isNotNull();
         new LongAssert(actualContainerCapacity.getModifiedTime()).isNotNull();

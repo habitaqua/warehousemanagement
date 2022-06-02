@@ -174,7 +174,7 @@ public class TestOutboundDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(RetriableException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper, Mockito.times(3)).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        Mockito.verify(dynamoDBMapper, Mockito.times(1)).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyAdd(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
@@ -241,7 +241,7 @@ public class TestOutboundDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(RetriableException.class)
                 .isThrownBy(() -> outboundDynamoDAO.update(outboundDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper, Mockito.times(3)).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        Mockito.verify(dynamoDBMapper, Mockito.times(1)).save(finishedGoodsOutboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyUpdate(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
 
@@ -301,7 +301,7 @@ public class TestOutboundDynamoDAOImpl {
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenThrow(new InternalServerErrorException("exception"));
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
         Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(() -> outboundDynamoDAO.getLastOutbound(outboundDTO.getWarehouseId())).withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper, Mockito.times(3)).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
+        Mockito.verify(dynamoDBMapper, Mockito.times(1)).query(Mockito.eq(FinishedGoodsOutbound.class), dynamoDBQueryExpressionCaptor.capture());
         Mockito.verifyZeroInteractions(paginatedQueryList);
         captorVerifyQuery(outboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);

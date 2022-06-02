@@ -1,16 +1,14 @@
 package org.warehousemanagement.service;
 
 import com.google.inject.Inject;
-import com.jcabi.aspects.RetryOnFailure;
 import org.warehousemanagement.dao.OutboundDAO;
-import org.warehousemanagement.entities.exceptions.RetriableException;
+import org.warehousemanagement.dao.OutboundDynamoDAOImpl;
 import org.warehousemanagement.entities.outbound.EndOutboundRequest;
 import org.warehousemanagement.entities.outbound.OutboundDTO;
 import org.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.warehousemanagement.entities.outbound.outboundstatus.Active;
 import org.warehousemanagement.entities.outbound.outboundstatus.Closed;
 import org.warehousemanagement.idgenerators.OutboundIdGenerator;
-import org.warehousemanagement.dao.OutboundDynamoDAOImpl;
 
 import java.time.Clock;
 
@@ -27,7 +25,6 @@ public class OutboundService {
         this.clock = clock;
     }
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public String startNewOutbound(StartOutboundRequest startOutboundRequest) {
         String warehouseId = startOutboundRequest.getWarehouseId();
         synchronized (warehouseId) {
@@ -39,7 +36,6 @@ public class OutboundService {
         }
     }
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public void endOutbound(EndOutboundRequest endOutboundRequest) {
 
         OutboundDTO outboundDTO = org.warehousemanagement.entities.outbound.OutboundDTO.builder().outboundId(endOutboundRequest.getOutboundId())

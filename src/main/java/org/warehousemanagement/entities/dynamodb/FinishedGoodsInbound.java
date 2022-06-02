@@ -22,7 +22,7 @@ public class FinishedGoodsInbound {
     private String inboundId;
     @DynamoDBTypeConverted(converter = InboundStatusTypeConvertor.class)
     @DynamoDBAttribute
-    private InboundStatus status;
+    private InboundStatus inboundStatus;
     @DynamoDBAttribute
     private String userId;
     @DynamoDBAttribute
@@ -33,14 +33,14 @@ public class FinishedGoodsInbound {
     private Long modifiedTime;
 
     @Builder
-    private FinishedGoodsInbound(String warehouseId, String inboundId, InboundStatus status, String userId, Long startTime, Long endTime, Long modifiedTime) {
+    private FinishedGoodsInbound(String warehouseId, String inboundId, InboundStatus inboundStatus, String userId, Long startTime, Long endTime, Long modifiedTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
 
         this.warehouseId = warehouseId;
         this.inboundId = inboundId;
-        this.status = status;
+        this.inboundStatus = inboundStatus;
         this.userId = userId;
         this.startTime = startTime;
         this.endTime = endTime;

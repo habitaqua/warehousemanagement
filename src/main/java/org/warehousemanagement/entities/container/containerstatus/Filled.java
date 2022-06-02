@@ -1,13 +1,15 @@
 package org.warehousemanagement.entities.container.containerstatus;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.List;
 import java.util.Set;
 
 public class Filled  implements ContainerStatus {
     @Override
-    public Set<ContainerStatus> previousStates() {
-        return ImmutableSet.of(new PartiallyFilled());
+    public List<ContainerStatus> previousStates() {
+        return ImmutableList.of(new PartiallyFilled(), new Available());
     }
 
     @Override

@@ -33,7 +33,6 @@ public class ContainerService {
         this.containerIdGenerator = containerIdGenerator;
     }
 
-    @RetryOnFailure(attempts = RETRY_ATTEMPTS, delay = RETRY_DELAY, types = RetriableException.class)
     public String add(AddContainerRequest addContainerRequest) {
 
         String warehouseId = addContainerRequest.getWarehouseId();
@@ -46,7 +45,6 @@ public class ContainerService {
         }
     }
 
-    @RetryOnFailure(attempts = RETRY_ATTEMPTS, delay = RETRY_DELAY, types = RetriableException.class)
     public PaginatedResponse<ContainerDTO> getContainers(GetContainersRequest getContainersRequest) {
         PaginatedResponse<ContainerDTO> containers = containerDAO.getContainers(getContainersRequest);
         String warehouseId = getContainersRequest.getWarehouseId();
@@ -60,7 +58,6 @@ public class ContainerService {
         return enrichedData;
     }
 
-    @RetryOnFailure(attempts = RETRY_ATTEMPTS, delay = RETRY_DELAY, types = RetriableException.class)
     public ContainerDTO getContainer(GetContainerRequest getContainerRequest) {
         Optional<ContainerDTO> containerOp = containerDAO.getContainer(getContainerRequest);
         if (!containerOp.isPresent()) {

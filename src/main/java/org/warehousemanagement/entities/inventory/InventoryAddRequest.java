@@ -14,36 +14,45 @@ import java.util.List;
  * Adding of inventory at a bulk level. Happens against a containerId.
  */
 @Value
-public class AddInventoryRequest {
+public class InventoryAddRequest {
 
     List<String> uniqueProductIds;
 
-    String inboundId;
     String skuCode;
-    String containerId;
+
+    String skuCategory;
+
+    String skuType;
     String warehouseId;
+
+    String companyId;
+
+    long productionTime;
     InventoryStatus inventoryStatus;
 
-    int containerMaxCapacity;
+
 
     @Builder
-    private AddInventoryRequest(List<String> uniqueProductIds, String skuCode, String containerId, String inboundId,
-                                String warehouseId, InventoryStatus inventoryStatus, int containerMaxCapacity) {
+    private InventoryAddRequest(List<String> uniqueProductIds, String skuCode, String companyId, Long productionTime,
+                               String skuCategory, String skuType, String warehouseId, InventoryStatus inventoryStatus) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(uniqueProductIds), "uniqueProductIds cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), " sku code cannot be null");
-        Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");
-        Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), " skuCode cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCategory), " skuCategory cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuType), " skuType cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
+        Preconditions.checkArgument(productionTime != null, "productionTime cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         Preconditions.checkArgument(inventoryStatus != null, "inventoryStatus cannot be null");
-        Preconditions.checkArgument(containerMaxCapacity >0, "max Capacity cannot be null");
 
 
         this.uniqueProductIds = uniqueProductIds;
         this.skuCode = skuCode;
-        this.inboundId = inboundId;
-        this.containerId = containerId;
+        this.companyId = companyId;
         this.warehouseId = warehouseId;
         this.inventoryStatus = inventoryStatus;
-        this.containerMaxCapacity = containerMaxCapacity;
+        this.productionTime = productionTime;
+        this.skuCategory = skuCategory;
+        this.skuType = skuType;
+
     }
 }

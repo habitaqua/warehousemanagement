@@ -98,7 +98,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         new StringAssert(actualOutbound.getWarehouseId()).isEqualTo(outboundDTO.getWarehouseId());
         new StringAssert(actualOutbound.getUserId()).isEqualTo(outboundDTO.getUserId());
         new StringAssert(actualOutbound.getCustomerId()).isEqualTo(outboundDTO.getCustomerId());
-        new StringAssert(actualOutbound.getStatus().getStatus()).isEqualTo(outboundDTO.getStatus().getStatus());
+        new StringAssert(actualOutbound.getOutboundStatus().getStatus()).isEqualTo(outboundDTO.getStatus().getStatus());
         new LongAssert(actualOutbound.getEndTime()).isNull();
         new LongAssert(actualOutbound.getStartTime()).isEqualTo(outboundDTO.getStartTime());
         new LongAssert(actualOutbound.getModifiedTime()).isEqualTo(outboundDTO.getModifiedTime());
@@ -153,7 +153,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         new StringAssert(actualOutbound.getOutboundId()).isEqualTo(updatedFGOutboundDTO.getOutboundId());
         new StringAssert(actualOutbound.getWarehouseId()).isEqualTo(updatedFGOutboundDTO.getWarehouseId());
         new StringAssert(actualOutbound.getUserId()).isEqualTo(updatedFGOutboundDTO.getUserId());
-        new StringAssert(actualOutbound.getStatus().getStatus()).isEqualTo(updatedFGOutboundDTO.getStatus().getStatus());
+        new StringAssert(actualOutbound.getOutboundStatus().getStatus()).isEqualTo(updatedFGOutboundDTO.getStatus().getStatus());
         new LongAssert(actualOutbound.getEndTime()).isEqualTo(updatedFGOutboundDTO.getEndTime());
         new LongAssert(actualOutbound.getStartTime()).isEqualTo(updatedFGOutboundDTO.getStartTime());
         new LongAssert(actualOutbound.getModifiedTime()).isEqualTo(updatedFGOutboundDTO.getModifiedTime());
@@ -178,7 +178,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         new StringAssert(actualOutbound.getOutboundId()).isEqualTo(updatedOutboundDTO.getOutboundId());
         new StringAssert(actualOutbound.getWarehouseId()).isEqualTo(updatedOutboundDTO.getWarehouseId());
         new StringAssert(actualOutbound.getUserId()).isEqualTo(updatedOutboundDTO.getUserId());
-        new StringAssert(actualOutbound.getStatus().getStatus()).isEqualTo(outboundDTO.getStatus().getStatus());
+        new StringAssert(actualOutbound.getOutboundStatus().getStatus()).isEqualTo(outboundDTO.getStatus().getStatus());
         new LongAssert(actualOutbound.getEndTime()).isEqualTo(updatedOutboundDTO.getEndTime());
         new LongAssert(actualOutbound.getStartTime()).isEqualTo(outboundDTO.getStartTime());
         new LongAssert(actualOutbound.getModifiedTime()).isEqualTo(updatedOutboundDTO.getModifiedTime());
@@ -214,7 +214,7 @@ public class TestInmemoryDbOutboundDynamoDAOImpl {
         new StringAssert(lastOutbound.getOutboundId()).isEqualTo(outboundDTO2.getOutboundId());
         new StringAssert(lastOutbound.getWarehouseId()).isEqualTo(outboundDTO2.getWarehouseId());
         new StringAssert(lastOutbound.getUserId()).isEqualTo(outboundDTO2.getUserId());
-        new StringAssert(lastOutbound.getStatus().getStatus()).isEqualTo(outboundDTO2.getStatus().getStatus());
+        new StringAssert(lastOutbound.getOutboundStatus().getStatus()).isEqualTo(outboundDTO2.getStatus().getStatus());
         new LongAssert(lastOutbound.getEndTime()).isEqualTo(outboundDTO2.getEndTime());
         new LongAssert(lastOutbound.getStartTime()).isEqualTo(outboundDTO2.getStartTime());
         new LongAssert(lastOutbound.getModifiedTime()).isEqualTo(outboundDTO2.getModifiedTime());

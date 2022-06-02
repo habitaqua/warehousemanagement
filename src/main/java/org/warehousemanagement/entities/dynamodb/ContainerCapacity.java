@@ -26,9 +26,9 @@ public class ContainerCapacity {
     @DynamoDBAttribute(attributeName = "currentCapacity")
     int currentCapacity;
 
-    @DynamoDBAttribute(attributeName = "status")
+    @DynamoDBAttribute(attributeName = "containerStatus")
     @DynamoDBTypeConverted(converter = ContainerCapacityStatusTypeConvertor.class)
-    ContainerStatus status;
+    ContainerStatus containerStatus;
 
     @DynamoDBAttribute(attributeName = "creationTime")
     long creationTime;
@@ -36,20 +36,20 @@ public class ContainerCapacity {
     long modifiedTime;
 
     @Builder
-    public ContainerCapacity(String warehouseContainerId,int currentCapacity,
-                             ContainerStatus status, Long creationTime, Long modifiedTime) {
+    public ContainerCapacity(String warehouseContainerId, int currentCapacity,
+                             ContainerStatus containerStatus, Long creationTime, Long modifiedTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseContainerId), "warehouseContainerId cannot be blank");
         Preconditions.checkArgument(currentCapacity >= 0,
                 "current capacity not in range");
-        Preconditions.checkArgument(status != null, "container capacity status cannot be null");
+        Preconditions.checkArgument(containerStatus != null, "container capacity status cannot be null");
         Preconditions.checkArgument(creationTime != null, "creationTime cannot be null");
         Preconditions.checkArgument(modifiedTime != null, "modified cannot be null");
 
 
         this.warehouseContainerId = warehouseContainerId;
         this.currentCapacity = currentCapacity;
-        this.status = status;
+        this.containerStatus = containerStatus;
         this.creationTime = creationTime;
         this.modifiedTime = modifiedTime;
     }

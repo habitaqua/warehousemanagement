@@ -2,16 +2,14 @@ package org.warehousemanagement.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.jcabi.aspects.RetryOnFailure;
-import org.warehousemanagement.entities.exceptions.RetriableException;
+import org.warehousemanagement.dao.InboundDAO;
+import org.warehousemanagement.dao.InboundDynamoDAOImpl;
 import org.warehousemanagement.entities.inbound.EndInboundRequest;
 import org.warehousemanagement.entities.inbound.FGInboundDTO;
 import org.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.warehousemanagement.entities.inbound.inboundstatus.Active;
 import org.warehousemanagement.entities.inbound.inboundstatus.Closed;
 import org.warehousemanagement.idgenerators.InboundIdGenerator;
-import org.warehousemanagement.dao.InboundDynamoDAOImpl;
-import org.warehousemanagement.dao.InboundDAO;
 
 import java.time.Clock;
 
@@ -35,7 +33,6 @@ public class InboundService {
      * @return
      */
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public String startInbound(StartInboundRequest startInboundRequest) {
         Preconditions.checkArgument(startInboundRequest != null, "startInboundRequest cannot be null");
         String warehouseId = startInboundRequest.getWarehouseId();
@@ -49,7 +46,6 @@ public class InboundService {
         }
     }
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public void endInbound(EndInboundRequest endInboundRequest) {
 
         FGInboundDTO fgInboundDTO = org.warehousemanagement.entities.inbound.FGInboundDTO.builder().inboundId(endInboundRequest.getInboundId())

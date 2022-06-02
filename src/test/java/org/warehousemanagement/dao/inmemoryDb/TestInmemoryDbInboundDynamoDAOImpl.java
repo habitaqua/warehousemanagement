@@ -95,7 +95,7 @@ public class TestInmemoryDbInboundDynamoDAOImpl {
         new StringAssert(actualInbound.getInboundId()).isEqualTo(fgInboundDTO.getInboundId());
         new StringAssert(actualInbound.getWarehouseId()).isEqualTo(fgInboundDTO.getWarehouseId());
         new StringAssert(actualInbound.getUserId()).isEqualTo(fgInboundDTO.getUserId());
-        new StringAssert(actualInbound.getStatus().getStatus()).isEqualTo(fgInboundDTO.getStatus().getStatus());
+        new StringAssert(actualInbound.getInboundStatus().getStatus()).isEqualTo(fgInboundDTO.getStatus().getStatus());
         new LongAssert(actualInbound.getEndTime()).isNull();
         new LongAssert(actualInbound.getStartTime()).isEqualTo(fgInboundDTO.getStartTime());
         new LongAssert(actualInbound.getModifiedTime()).isEqualTo(fgInboundDTO.getModifiedTime());
@@ -148,7 +148,7 @@ public class TestInmemoryDbInboundDynamoDAOImpl {
         new StringAssert(actualInbound.getInboundId()).isEqualTo(updatedFGInboundDTO.getInboundId());
         new StringAssert(actualInbound.getWarehouseId()).isEqualTo(updatedFGInboundDTO.getWarehouseId());
         new StringAssert(actualInbound.getUserId()).isEqualTo(updatedFGInboundDTO.getUserId());
-        new StringAssert(actualInbound.getStatus().getStatus()).isEqualTo(updatedFGInboundDTO.getStatus().getStatus());
+        new StringAssert(actualInbound.getInboundStatus().getStatus()).isEqualTo(updatedFGInboundDTO.getStatus().getStatus());
         new LongAssert(actualInbound.getEndTime()).isEqualTo(updatedFGInboundDTO.getEndTime());
         new LongAssert(actualInbound.getStartTime()).isEqualTo(updatedFGInboundDTO.getStartTime());
         new LongAssert(actualInbound.getModifiedTime()).isEqualTo(updatedFGInboundDTO.getModifiedTime());
@@ -172,7 +172,7 @@ public class TestInmemoryDbInboundDynamoDAOImpl {
         new StringAssert(actualInbound.getInboundId()).isEqualTo(updatedFGInboundDTO.getInboundId());
         new StringAssert(actualInbound.getWarehouseId()).isEqualTo(updatedFGInboundDTO.getWarehouseId());
         new StringAssert(actualInbound.getUserId()).isEqualTo(updatedFGInboundDTO.getUserId());
-        new StringAssert(actualInbound.getStatus().getStatus()).isEqualTo(fgInboundDTO.getStatus().getStatus());
+        new StringAssert(actualInbound.getInboundStatus().getStatus()).isEqualTo(fgInboundDTO.getStatus().getStatus());
         new LongAssert(actualInbound.getEndTime()).isEqualTo(updatedFGInboundDTO.getEndTime());
         new LongAssert(actualInbound.getStartTime()).isEqualTo(fgInboundDTO.getStartTime());
         new LongAssert(actualInbound.getModifiedTime()).isEqualTo(updatedFGInboundDTO.getModifiedTime());
@@ -208,7 +208,7 @@ public class TestInmemoryDbInboundDynamoDAOImpl {
         new StringAssert(lastInbound.getInboundId()).isEqualTo(fgInboundDTO2.getInboundId());
         new StringAssert(lastInbound.getWarehouseId()).isEqualTo(fgInboundDTO2.getWarehouseId());
         new StringAssert(lastInbound.getUserId()).isEqualTo(fgInboundDTO2.getUserId());
-        new StringAssert(lastInbound.getStatus().getStatus()).isEqualTo(fgInboundDTO2.getStatus().getStatus());
+        new StringAssert(lastInbound.getInboundStatus().getStatus()).isEqualTo(fgInboundDTO2.getStatus().getStatus());
         new LongAssert(lastInbound.getEndTime()).isEqualTo(fgInboundDTO2.getEndTime());
         new LongAssert(lastInbound.getStartTime()).isEqualTo(fgInboundDTO2.getStartTime());
         new LongAssert(lastInbound.getModifiedTime()).isEqualTo(fgInboundDTO2.getModifiedTime());

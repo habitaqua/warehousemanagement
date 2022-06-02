@@ -25,7 +25,7 @@ public class FinishedGoodsOutbound {
     private String outboundId;
     @DynamoDBTypeConverted(converter = OutboundStatusTypeConvertor.class)
     @DynamoDBAttribute
-    private OutboundStatus status;
+    private OutboundStatus outboundStatus;
 
     @DynamoDBAttribute
     private String customerId;
@@ -39,7 +39,7 @@ public class FinishedGoodsOutbound {
     private Long modifiedTime;
 
     @Builder
-    private FinishedGoodsOutbound(String warehouseId, String outboundId, String customerId, OutboundStatus status, String userId, Long startTime, Long endTime, Long modifiedTime) {
+    private FinishedGoodsOutbound(String warehouseId, String outboundId, String customerId, OutboundStatus outboundStatus, String userId, Long startTime, Long endTime, Long modifiedTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
@@ -47,7 +47,7 @@ public class FinishedGoodsOutbound {
         this.warehouseId = warehouseId;
         this.outboundId = outboundId;
         this.customerId = customerId;
-        this.status = status;
+        this.outboundStatus = outboundStatus;
         this.userId = userId;
         this.startTime = startTime;
         this.endTime = endTime;

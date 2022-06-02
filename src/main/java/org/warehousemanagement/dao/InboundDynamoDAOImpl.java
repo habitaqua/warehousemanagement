@@ -38,7 +38,6 @@ public class InboundDynamoDAOImpl implements InboundDAO {
      *
      * @param fgInboundDTO
      */
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void add(FGInboundDTO fgInboundDTO) {
         try {
             Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
@@ -67,7 +66,6 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         }
     }
 
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void update(FGInboundDTO fgInboundDTO) {
         try {
             Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
@@ -105,7 +103,6 @@ public class InboundDynamoDAOImpl implements InboundDAO {
      * @param warehouseId
      * @return
      */
-    @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public Optional<FinishedGoodsInbound> getLastInbound(String warehouseId) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");

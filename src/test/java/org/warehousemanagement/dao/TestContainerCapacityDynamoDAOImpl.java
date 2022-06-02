@@ -68,7 +68,7 @@ public class TestContainerCapacityDynamoDAOImpl {
         String hashKey = String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1);
 
         ContainerCapacity expectedEntity = ContainerCapacity.builder().warehouseContainerId(hashKey).currentCapacity(0)
-                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).status(new Available()).build();
+                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).containerStatus(new Available()).build();
         Mockito.when(dynamoDBMapper.load(ContainerCapacity.class, hashKey)).thenReturn(expectedEntity);
         Optional<ContainerCapacity> containerCapacityOp = containerCapacityDynamoDAO.get(WAREHOUSE_1, CONTAINER_1);
         new BooleanAssert(containerCapacityOp.isPresent()).isEqualTo(true);
@@ -163,7 +163,7 @@ public class TestContainerCapacityDynamoDAOImpl {
         expected.put("warehouseContainerId", new ExpectedAttributeValue().withExists(false));
         expectedDdbSaveExpression.withExpected(expected);
         ContainerCapacity expectedEntity = ContainerCapacity.builder().warehouseContainerId(hashKey).currentCapacity(0)
-                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).status(new Available()).build();
+                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).containerStatus(new Available()).build();
 
         Assertions.assertThat(actualDdbSaveExpression).usingRecursiveComparison().isEqualTo(expectedDdbSaveExpression);
         Assertions.assertThat(actualEntity).usingRecursiveComparison().isEqualTo(expectedEntity);

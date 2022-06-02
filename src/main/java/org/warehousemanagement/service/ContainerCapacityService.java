@@ -19,7 +19,6 @@ public class ContainerCapacityService {
         this.containerCapacityDAO = containerCapacityDAO;
     }
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public Optional<ContainerCapacity> get(String warehouseId, String containerId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");
@@ -27,7 +26,6 @@ public class ContainerCapacityService {
     }
 
 
-    @RetryOnFailure(attempts = 3, delay = 5, types = RetriableException.class)
     public void initialize(String warehouseId, String containerId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");

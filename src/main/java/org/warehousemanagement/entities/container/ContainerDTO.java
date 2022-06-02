@@ -92,7 +92,7 @@ public class ContainerDTO {
 
         public Builder currentCapacityDetails(ContainerCapacity containerCapacity) {
             this.currentCapacity = containerCapacity.getCurrentCapacity();
-            this.status = containerCapacity.getStatus();
+            this.status = containerCapacity.getContainerStatus();
             return this;
         }
 

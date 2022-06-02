@@ -39,7 +39,7 @@ public class FGInboundDTO {
    public FinishedGoodsInbound toDbEntity() {
         FinishedGoodsInbound inbound = FinishedGoodsInbound.builder().warehouseId(this.getWarehouseId())
                 .inboundId(this.getInboundId()).startTime(this.getStartTime()).endTime(this.getEndTime())
-                .modifiedTime(this.modifiedTime).status(this.getStatus()).userId(this.getUserId()).build();
+                .modifiedTime(this.modifiedTime).inboundStatus(this.getStatus()).userId(this.getUserId()).build();
         return inbound;
     }
 }

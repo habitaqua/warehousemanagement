@@ -35,7 +35,6 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
         this.clock = clock;
     }
 
-    //@RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public Optional<ContainerCapacity> get(String warehouseId, String containerId) {
         try {
             Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
@@ -52,7 +51,6 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
         }
     }
 
-  //  @RetryOnFailure(attempts = 3, delay = 10, types = RetriableException.class)
     public void init(String warehouseId, String containerId) {
 
         try {
@@ -61,7 +59,7 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
 
             String warehouseContainerId = String.join(DELIMITER, warehouseId, containerId);
             long time = clock.millis();
-            ContainerCapacity containerCapacity = ContainerCapacity.builder().status(new Available())
+            ContainerCapacity containerCapacity = ContainerCapacity.builder().containerStatus(new Available())
                     .currentCapacity(0).warehouseContainerId(warehouseContainerId).creationTime(time).modifiedTime(time).build();
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
             Map expected = new HashMap();

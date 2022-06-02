@@ -6,13 +6,14 @@ import com.google.common.collect.ImmutableSet;
 import java.util.List;
 import java.util.Set;
 
-public class Inbound implements InventoryStatus {
-
-    @Override public List<InventoryStatus> previousStates() {
+public class Production implements InventoryStatus{
+    @Override
+    public List<InventoryStatus> previousStates() {
         return ImmutableList.of(new Production());
     }
 
-    @Override public String getStatus() {
-        return "INBOUND";
+    @Override
+    public String getStatus() {
+        return "PRODUCTION";
     }
 }
