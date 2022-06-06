@@ -13,8 +13,8 @@ import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
-import org.habitbev.warehousemanagement.service.barcodes.BarcodesPersistor;
-import org.habitbev.warehousemanagement.service.barcodes.S3BarcodesPersistor;
+import org.habitbev.warehousemanagement.helpers.BarcodesPersistor;
+import org.habitbev.warehousemanagement.helpers.S3BarcodesPersistor;
 
 import java.io.IOException;
 import java.time.Clock;

@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.service.barcodes;
+package org.habitbev.warehousemanagement.helpers;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;

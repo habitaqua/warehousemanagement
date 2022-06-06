@@ -7,5 +7,5 @@ public interface ContainerStatus {
 
     List<ContainerStatus> previousStates();
 
-    String getStatus();
+    String toString();
 }

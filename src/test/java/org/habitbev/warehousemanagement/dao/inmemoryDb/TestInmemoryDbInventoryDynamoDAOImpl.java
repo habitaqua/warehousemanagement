@@ -389,7 +389,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         inventoryDynamoDAO.add(addRequest2);
 
         Optional<ContainerCapacity> containerCapacityAfterAdd = containerCapacityDAO.get(addRequest1.getWarehouseId(), CONTAINER_1);
-        new StringAssert(containerCapacityAfterAdd.get().getContainerStatus().getStatus()).isEqualTo(new Available().getStatus());
+        new StringAssert(containerCapacityAfterAdd.get().getContainerStatus().toString()).isEqualTo(new Available().toString());
         new IntegerAssert(containerCapacityAfterAdd.get().getCurrentCapacity()).isEqualTo(0);
 
 
@@ -399,7 +399,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
 
         Optional<ContainerCapacity> containerCapacityAfterPartialInbound = containerCapacityDAO.get(addRequest1.getWarehouseId(), CONTAINER_1);
-        new StringAssert(containerCapacityAfterPartialInbound.get().getContainerStatus().getStatus()).isEqualTo(new PartiallyFilled().getStatus());
+        new StringAssert(containerCapacityAfterPartialInbound.get().getContainerStatus().toString()).isEqualTo(new PartiallyFilled().toString());
         new IntegerAssert(containerCapacityAfterPartialInbound.get().getCurrentCapacity()).isEqualTo(4);
 
 
@@ -409,7 +409,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
 
         Optional<ContainerCapacity> containerCapacityAfterFullInbound = containerCapacityDAO.get(addRequest1.getWarehouseId(), CONTAINER_1);
-        new StringAssert(containerCapacityAfterFullInbound.get().getContainerStatus().getStatus()).isEqualTo(new Filled().getStatus());
+        new StringAssert(containerCapacityAfterFullInbound.get().getContainerStatus().toString()).isEqualTo(new Filled().toString());
         new IntegerAssert(containerCapacityAfterFullInbound.get().getCurrentCapacity()).isEqualTo(5);
 
         InventoryOutboundRequest partialOutboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
@@ -418,7 +418,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.outbound(partialOutboundRequest);
         Optional<ContainerCapacity> containerCapacityAfterPartialOutbound = containerCapacityDAO.get(addRequest1.getWarehouseId(), CONTAINER_1);
-        new StringAssert(containerCapacityAfterPartialOutbound.get().getContainerStatus().getStatus()).isEqualTo(new PartiallyFilled().getStatus());
+        new StringAssert(containerCapacityAfterPartialOutbound.get().getContainerStatus().toString()).isEqualTo(new PartiallyFilled().toString());
         new IntegerAssert(containerCapacityAfterPartialOutbound.get().getCurrentCapacity()).isEqualTo(1);
 
 
@@ -428,7 +428,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.outbound(fullOutboundrequest);
         Optional<ContainerCapacity> containerCapacityAfterFullOutbound = containerCapacityDAO.get(addRequest1.getWarehouseId(), CONTAINER_1);
-        new StringAssert(containerCapacityAfterFullOutbound.get().getContainerStatus().getStatus()).isEqualTo(new Available().getStatus());
+        new StringAssert(containerCapacityAfterFullOutbound.get().getContainerStatus().toString()).isEqualTo(new Available().toString());
         new IntegerAssert(containerCapacityAfterFullOutbound.get().getCurrentCapacity()).isEqualTo(0);
     }
 

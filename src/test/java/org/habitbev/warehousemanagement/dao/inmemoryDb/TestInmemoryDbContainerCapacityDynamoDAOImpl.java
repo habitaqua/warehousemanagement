@@ -103,7 +103,7 @@ public class TestInmemoryDbContainerCapacityDynamoDAOImpl {
         new StringAssert(warehouseContainerId[0]).isEqualTo(WAREHOUSE_1);
         new StringAssert(warehouseContainerId[1]).isEqualTo(CONTAINER_1);
         new IntegerAssert(actualContainerCapacity.getCurrentCapacity()).isEqualTo(0);
-        new StringAssert(actualContainerCapacity.getContainerStatus().getStatus()).isEqualTo(new Available().getStatus());
+        new StringAssert(actualContainerCapacity.getContainerStatus().toString()).isEqualTo(new Available().toString());
         new IntegerAssert(warehouseContainerId.length).isEqualTo(2);
         new LongAssert(actualContainerCapacity.getCreationTime()).isNotNull();
         new LongAssert(actualContainerCapacity.getModifiedTime()).isNotNull();

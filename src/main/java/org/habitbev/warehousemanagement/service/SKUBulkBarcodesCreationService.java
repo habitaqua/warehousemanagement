@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.service.barcodes;
+package org.habitbev.warehousemanagement.service;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -18,6 +18,7 @@ import org.habitbev.warehousemanagement.entities.exceptions.NonRetriableExceptio
 import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Production;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
+import org.habitbev.warehousemanagement.helpers.BarcodesPersistor;
 import org.habitbev.warehousemanagement.helpers.idgenerators.ProductIdGenerator;
 import org.habitbev.warehousemanagement.service.InventoryService;
 import org.habitbev.warehousemanagement.service.SKUService;

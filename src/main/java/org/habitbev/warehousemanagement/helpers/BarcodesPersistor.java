@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.service.barcodes;
+package org.habitbev.warehousemanagement.helpers;
 
 
 public interface BarcodesPersistor {

@@ -34,19 +34,19 @@ public class TestContainerStatusDeterminer {
     @Test
     public void test_determine_status_new_capacity_zero() {
         ContainerStatus containerStatus = containerStatusDeterminer.determineStatus(0, 5);
-        new StringAssert(containerStatus.getStatus()).isEqualTo(new Available().getStatus());
+        new StringAssert(containerStatus.toString()).isEqualTo(new Available().toString());
     }
 
     @Test
     public void test_determine_status_new_capacity_equals_max() {
         ContainerStatus containerStatus = containerStatusDeterminer.determineStatus(5, 5);
-        new StringAssert(containerStatus.getStatus()).isEqualTo(new Filled().getStatus());
+        new StringAssert(containerStatus.toString()).isEqualTo(new Filled().toString());
     }
 
     @Test
     public void test_determine_status_new_capacity_less_than_max() {
         ContainerStatus containerStatus = containerStatusDeterminer.determineStatus(4, 5);
-        new StringAssert(containerStatus.getStatus()).isEqualTo(new PartiallyFilled().getStatus());
+        new StringAssert(containerStatus.toString()).isEqualTo(new PartiallyFilled().toString());
     }
 
 }

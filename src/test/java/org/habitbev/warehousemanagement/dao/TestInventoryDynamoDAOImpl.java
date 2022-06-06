@@ -535,7 +535,7 @@ public class TestInventoryDynamoDAOImpl {
                 new AttributeValue().withN(String.valueOf(newCapacity)));
         expressionAttributeValues
                 .put(":existing_quantity", new AttributeValue().withN(String.valueOf(existingCapacity)));
-        expressionAttributeValues.put(":new_status", new AttributeValue().withS(newContainerStatus.getStatus()));
+        expressionAttributeValues.put(":new_status", new AttributeValue().withS(newContainerStatus.toString()));
         expressionAttributeValues.put(":modified_time", new AttributeValue().withN(String.valueOf(EPOCH_MILLI)));
         String previousStatus = getAppendedStatusString(newContainerStatus, expressionAttributeValues);
 
@@ -589,7 +589,7 @@ public class TestInventoryDynamoDAOImpl {
         for (int i = 0; i < containerStatus.previousStates().size(); i++) {
             String key = ":is" + (i + 1);
             updatedAttributes.put(key,
-                    new AttributeValue().withS(containerStatus.previousStates().get(i).getStatus()));
+                    new AttributeValue().withS(containerStatus.previousStates().get(i).toString()));
             previousValues.add(key);
         }
         String previousStatus = String.join(", ", previousValues);

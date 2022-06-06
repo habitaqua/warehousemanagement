@@ -11,7 +11,7 @@ public class Discontinued implements ContainerStatus {
     }
 
     @Override
-    public String getStatus() {
+    public String toString() {
         return "DISCONTINUED";
     }
 }

@@ -7,14 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.habitbev.warehousemanagement.entities.SKUBarcodesGenerationRequest;
-import org.habitbev.warehousemanagement.service.barcodes.SKUBulkBarcodesCreationService;
+import org.habitbev.warehousemanagement.service.SKUBulkBarcodesCreationService;
 import org.habitbev.warehousemanagement.guice.MainModule;
 
 import java.util.Map;
 
 public class BulkBarcodesGenerationHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
-    private org.habitbev.warehousemanagement.service.barcodes.SKUBulkBarcodesCreationService SKUBulkBarcodesCreationService;
+    private org.habitbev.warehousemanagement.service.SKUBulkBarcodesCreationService SKUBulkBarcodesCreationService;
     private ObjectMapper objectMapper;
     private Injector injector;
 
