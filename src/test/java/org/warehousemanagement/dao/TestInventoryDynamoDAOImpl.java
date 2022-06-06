@@ -478,7 +478,7 @@ public class TestInventoryDynamoDAOImpl {
                 , inboundRequest.getContainerMaxCapacity());
         transactWrites.add(new TransactWriteItem().withUpdate(updateCapacityExpression));
         TransactWriteItemsRequest addInventoryTransaction = new TransactWriteItemsRequest()
-                .withTransactItems(transactWrites).withClientRequestToken(inboundRequest.getUniqueProductIds().get(0))
+                .withTransactItems(transactWrites)
                 .withReturnConsumedCapacity(ReturnConsumedCapacity.TOTAL);
         return addInventoryTransaction;
     }
@@ -490,7 +490,7 @@ public class TestInventoryDynamoDAOImpl {
                 , outboundRequest.getContainerMaxCapacity());
         transactWrites.add(new TransactWriteItem().withUpdate(updateCapacityExpression));
         TransactWriteItemsRequest addInventoryTransaction = new TransactWriteItemsRequest()
-                .withTransactItems(transactWrites).withClientRequestToken(outboundRequest.getUniqueProductIds().get(0))
+                .withTransactItems(transactWrites)
                 .withReturnConsumedCapacity(ReturnConsumedCapacity.TOTAL);
         return addInventoryTransaction;
     }

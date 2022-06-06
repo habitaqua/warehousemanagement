@@ -1,7 +1,6 @@
 package org.warehousemanagement.service;
 
 import com.google.inject.Inject;
-import com.jcabi.aspects.RetryOnFailure;
 import org.warehousemanagement.dao.ContainerDAO;
 import org.warehousemanagement.entities.PaginatedResponse;
 import org.warehousemanagement.entities.dynamodb.ContainerCapacity;
@@ -10,8 +9,7 @@ import org.warehousemanagement.entities.container.GetContainerRequest;
 import org.warehousemanagement.entities.container.GetContainersRequest;
 import org.warehousemanagement.entities.container.ContainerDTO;
 import org.warehousemanagement.entities.exceptions.ResourceNotAvailableException;
-import org.warehousemanagement.entities.exceptions.RetriableException;
-import org.warehousemanagement.idgenerators.ContainerIdGenerator;
+import org.warehousemanagement.helpers.idgenerators.ContainerIdGenerator;
 
 import java.util.List;
 import java.util.Optional;

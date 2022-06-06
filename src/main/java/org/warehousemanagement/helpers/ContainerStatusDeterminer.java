@@ -1,5 +1,6 @@
 package org.warehousemanagement.helpers;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Singleton;
 import org.warehousemanagement.entities.container.containerstatus.Available;
 import org.warehousemanagement.entities.container.containerstatus.ContainerStatus;
@@ -9,7 +10,9 @@ import org.warehousemanagement.entities.container.containerstatus.PartiallyFille
 @Singleton
 public class ContainerStatusDeterminer {
 
-    public ContainerStatus determineStatus(int newCapacity, int maxCapacity) {
+    public ContainerStatus determineStatus(Integer newCapacity, Integer maxCapacity) {
+        Preconditions.checkArgument(newCapacity!=null && newCapacity >=0, "newCapacity cannot be out of bounds");
+        Preconditions.checkArgument(maxCapacity!=null && maxCapacity >=0, "nmaxCapacity cannot be out of bounds");
 
         ContainerStatus newContainerStatus = new Available();
         if (newCapacity == 0) {

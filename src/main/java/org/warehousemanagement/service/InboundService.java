@@ -9,7 +9,7 @@ import org.warehousemanagement.entities.inbound.FGInboundDTO;
 import org.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.warehousemanagement.entities.inbound.inboundstatus.Active;
 import org.warehousemanagement.entities.inbound.inboundstatus.Closed;
-import org.warehousemanagement.idgenerators.InboundIdGenerator;
+import org.warehousemanagement.helpers.idgenerators.InboundIdGenerator;
 
 import java.time.Clock;
 

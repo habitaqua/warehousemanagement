@@ -1,6 +1,8 @@
-package org.warehousemanagement.idgenerators;
+package org.warehousemanagement.helpers.idgenerators;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import org.warehousemanagement.dao.OutboundDAO;
 import org.warehousemanagement.entities.dynamodb.FinishedGoodsOutbound;
 import org.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.warehousemanagement.dao.OutboundDynamoDAOImpl;
@@ -11,18 +13,20 @@ public class WarehouseWiseIncrementalOutboundIdGenerator implements OutboundIdGe
 
     public static final String OUTBOUND = "OUTBOUND-";
     public static final String FIRST_OUTBOUND_ID = "OUTBOUND-1";
-    OutboundDynamoDAOImpl outboundDbSAO;
+    OutboundDAO outboundDAO;
 
     @Inject
-    public WarehouseWiseIncrementalOutboundIdGenerator(OutboundDynamoDAOImpl outboundDbSAO) {
-        this.outboundDbSAO = outboundDbSAO;
+    public WarehouseWiseIncrementalOutboundIdGenerator(OutboundDAO outboundDAO) {
+        this.outboundDAO = outboundDAO;
     }
 
     @Override
     public String generate(StartOutboundRequest startOutboundRequest) {
 
+        Preconditions.checkArgument(startOutboundRequest != null,
+                "warehouseWiseIncrementalOutboundIdGenerator.startOutboundRequest cannot be null");
         String warehouseId = startOutboundRequest.getWarehouseId();
-        Optional<FinishedGoodsOutbound> lastOutbound = outboundDbSAO.getLastOutbound(warehouseId);
+        Optional<FinishedGoodsOutbound> lastOutbound = outboundDAO.getLastOutbound(warehouseId);
         if (lastOutbound.isPresent()) {
             String locationId = lastOutbound.get().getOutboundId();
             Integer number = Integer.valueOf(locationId.split(OUTBOUND)[1]);

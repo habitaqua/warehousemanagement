@@ -54,7 +54,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             log.error("Retriable Error occurred while starting inbound", e);
             throw new RetriableException(e);
         } catch (ConditionalCheckFailedException ce) {
-            log.error("Inbound", outboundDTO.getOutboundId(), " already exist in given warehouse",
+            log.error("Outbound", outboundDTO.getOutboundId(), " already exist in given warehouse",
                     outboundDTO.getWarehouseId(), ce);
             throw new ResourceAlreadyExistsException(ce);
         } catch (Exception e) {
@@ -76,7 +76,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             if (newOutboundStatus != null) {
                 List<AttributeValue> allowedStatuses = newOutboundStatus.previousStates()
                         .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
-                expected.put("status", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
+                expected.put("outboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                         .withAttributeValueList(allowedStatuses));
             }
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);

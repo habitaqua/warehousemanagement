@@ -1,4 +1,4 @@
-package org.warehousemanagement.idgenerators;
+package org.warehousemanagement.helpers.idgenerators;
 
 public interface ContainerIdGenerator<T> {
 

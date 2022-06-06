@@ -6,21 +6,21 @@ import lombok.Value;
 import org.apache.commons.lang3.StringUtils;
 
 @Value
-public class UniqueProductIdsGenerationRequestDTO {
+public class UniqueProductIdsGenerationRequest {
 
     String companyId;
 
     Long productionTime;
     String warehouseId;
-    SKUCategory skuCategory;
-    SKUType skuType;
+    String skuCategory;
+    String skuType;
 
     String skuCode;
     int quantity;
 
     @Builder
-    private UniqueProductIdsGenerationRequestDTO(String companyId, String warehouseId, String skuCategory, String skuType,
-                                                 String skuCode, int quantity, Long productionTime) {
+    private UniqueProductIdsGenerationRequest(String companyId, String warehouseId, String skuCategory, String skuType,
+                                              String skuCode, int quantity, Long productionTime) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be null");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be null");
@@ -33,12 +33,9 @@ public class UniqueProductIdsGenerationRequestDTO {
 
         this.companyId = companyId;
         this.warehouseId = warehouseId;
-        this.skuCategory = SKUCategory.fromName(skuCategory);
-        this.skuType = SKUType.fromName(skuType);
+        this.skuCategory = skuCategory;
+        this.skuType = skuType;
         this.skuCode = skuCode;
-        if (!this.skuCategory.isSupported(this.skuType)) {
-            throw new UnsupportedOperationException("skuCategory and skuType and not compatible");
-        }
         this.quantity = quantity;
         this.productionTime = productionTime;
     }

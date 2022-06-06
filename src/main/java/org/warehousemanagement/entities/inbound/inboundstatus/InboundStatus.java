@@ -1,11 +1,11 @@
 package org.warehousemanagement.entities.inbound.inboundstatus;
 
-import java.util.Set;
+import java.util.List;
 
 public interface InboundStatus {
 
 
-    Set<InboundStatus> previousStates();
+    List<InboundStatus> previousStates();
 
     String getStatus();
 }

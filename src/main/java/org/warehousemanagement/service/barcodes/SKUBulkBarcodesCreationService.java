@@ -15,13 +15,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.warehousemanagement.dao.InventoryDAO;
 import org.warehousemanagement.entities.BarcodeDataDTO;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequest;
-import org.warehousemanagement.entities.UniqueProductIdsGenerationRequestDTO;
+import org.warehousemanagement.entities.UniqueProductIdsGenerationRequest;
 import org.warehousemanagement.entities.exceptions.NonRetriableException;
 import org.warehousemanagement.entities.exceptions.RetriableException;
 import org.warehousemanagement.entities.inventory.InventoryAddRequest;
 import org.warehousemanagement.entities.inventory.inventorystatus.Production;
 import org.warehousemanagement.entities.sku.SKU;
-import org.warehousemanagement.idgenerators.ProductIdGenerator;
+import org.warehousemanagement.helpers.idgenerators.ProductIdGenerator;
 import org.warehousemanagement.service.SKUService;
 import org.warehousemanagement.utils.Utilities;
 
@@ -45,13 +45,13 @@ public class SKUBulkBarcodesCreationService {
     ExecutorService executorService;
     Clock clock;
     BarcodesPersistor barcodesPersistor;
-    ProductIdGenerator<UniqueProductIdsGenerationRequestDTO> productIdGenerator;
+    ProductIdGenerator<UniqueProductIdsGenerationRequest> productIdGenerator;
     String filePath;
 
 
     @Inject
     public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor,
-                                          ProductIdGenerator<UniqueProductIdsGenerationRequestDTO> productIdGenerator, InventoryDAO inventoryDAO,
+                                          ProductIdGenerator<UniqueProductIdsGenerationRequest> productIdGenerator, InventoryDAO inventoryDAO,
                                           SKUService skuService, String filePath, ExecutorService executorService) {
         this.clock = clock;
         this.barcodesPersistor = barcodesPersistor;
@@ -70,7 +70,7 @@ public class SKUBulkBarcodesCreationService {
             long productionTime = clock.millis();
             String skuCategory = sku.getSkuCategory();
             String skuType = sku.getSkuType();
-            UniqueProductIdsGenerationRequestDTO productIdsRequestDTO = UniqueProductIdsGenerationRequestDTO.builder()
+            UniqueProductIdsGenerationRequest productIdsRequestDTO = UniqueProductIdsGenerationRequest.builder()
                     .skuCategory(skuCategory).skuCode(sku.getSkuCode()).skuType(skuType)
                     .warehouseId(request.getWarehouseId()).companyId(request.getCompanyId()).productionTime(productionTime)
                     .quantity(request.getQuantity()).build();
@@ -103,13 +103,13 @@ public class SKUBulkBarcodesCreationService {
         }
     }
 
-    private List<String> addProductIdsToInventory(UniqueProductIdsGenerationRequestDTO idsRequestDTO, List<String> generatedIds) throws InterruptedException, ExecutionException {
+    private List<String> addProductIdsToInventory(UniqueProductIdsGenerationRequest idsRequestDTO, List<String> generatedIds) throws InterruptedException, ExecutionException {
         List<CompletableFuture<List<String>>> completableFutures = Lists.partition(generatedIds, BATCH_SAVE_SIZE).stream()
                 .map(subIds -> CompletableFuture.supplyAsync(() -> {
                     InventoryAddRequest inventoryAddRequest = InventoryAddRequest.builder().uniqueProductIds(subIds)
                             .inventoryStatus(new Production()).productionTime(idsRequestDTO.getProductionTime())
-                            .skuCategory(idsRequestDTO.getSkuCategory().getValue()).skuCode(idsRequestDTO.getSkuCode())
-                            .skuType(idsRequestDTO.getSkuType().getValue()).warehouseId(idsRequestDTO.getWarehouseId())
+                            .skuCategory(idsRequestDTO.getSkuCategory()).skuCode(idsRequestDTO.getSkuCode())
+                            .skuType(idsRequestDTO.getSkuType()).warehouseId(idsRequestDTO.getWarehouseId())
                             .companyId(idsRequestDTO.getCompanyId()).build();
                     return inventoryDAO.add(inventoryAddRequest);
                 }, executorService)).collect(Collectors.toList());

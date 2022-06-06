@@ -32,7 +32,6 @@ public class ContainerDTO {
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
         Preconditions.checkArgument(Utilities.validateContainerPredefinedCapacities(skuCodeWisePredefinedCapacity),
                 "total capacity cannot be zero or empty");
-        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
         Preconditions.checkArgument(currentCapacity >= 0, "current capacity not in range");
 
         this.containerId = containerId;

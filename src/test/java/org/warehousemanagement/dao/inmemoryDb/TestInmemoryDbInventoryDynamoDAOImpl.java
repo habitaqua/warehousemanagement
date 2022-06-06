@@ -303,6 +303,19 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
     @Test
     public void test_outbound_non_generated_ids() {
+
+        long productionTime = clock.millis();
+        InventoryAddRequest request = InventoryAddRequest.builder().warehouseId(WAREHOUSE_1).companyId(COMPANY_1)
+                .inventoryStatus(new Production()).skuType(SKU_TYPE).skuCode(SKU_CODE).skuCategory(SKU_CATEGORY)
+                .uniqueProductIds(UNIQUE_PRODUCT_IDS_2).productionTime(productionTime).build();
+
+        inventoryDynamoDAO.add(request);
+
+        InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+                .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_2).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
+        inventoryDynamoDAO.inbound(inventoryInboundRequest);
+
+
         InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).build();
@@ -317,7 +330,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(outboundRequest.getWarehouseId(), outboundRequest.getContainerId());
         new BooleanAssert(containerCapacityActualOp.isPresent()).isEqualTo(true);
         ContainerCapacity containerCapacityExpected = ContainerCapacity.builder().containerStatus(new PartiallyFilled())
-                .currentCapacity(0).warehouseContainerId(warehouseContainerId)
+                .currentCapacity(4).warehouseContainerId(warehouseContainerId)
                 .creationTime(clock.millis()).modifiedTime(clock.millis()).build();
         RecursiveComparisonConfiguration ignoreFields = RecursiveComparisonConfiguration.builder().withIgnoredFields("creationTime", "modifiedTime").build();
         new ObjectAssert<ContainerCapacity>(containerCapacityActualOp.get()).usingRecursiveComparison(ignoreFields).isEqualTo(containerCapacityExpected);

@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.warehousemanagement.entities.SKUBarcodesGenerationRequest;
-import org.warehousemanagement.entities.UniqueProductIdsGenerationRequestDTO;
 import org.warehousemanagement.guice.MainModule;
 import org.warehousemanagement.service.barcodes.SKUBulkBarcodesCreationService;
 

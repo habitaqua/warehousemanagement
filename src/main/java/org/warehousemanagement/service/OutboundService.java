@@ -8,7 +8,7 @@ import org.warehousemanagement.entities.outbound.OutboundDTO;
 import org.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.warehousemanagement.entities.outbound.outboundstatus.Active;
 import org.warehousemanagement.entities.outbound.outboundstatus.Closed;
-import org.warehousemanagement.idgenerators.OutboundIdGenerator;
+import org.warehousemanagement.helpers.idgenerators.OutboundIdGenerator;
 
 import java.time.Clock;
 

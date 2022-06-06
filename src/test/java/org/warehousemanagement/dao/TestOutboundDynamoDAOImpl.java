@@ -348,7 +348,7 @@ public class TestOutboundDynamoDAOImpl {
         if (outboundDTO.getStatus() != null) {
             List<AttributeValue> allowedStatuses = outboundDTO.getStatus().previousStates()
                     .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
-            expected.put("status", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
+            expected.put("outboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                     .withAttributeValueList(allowedStatuses));
         }
 

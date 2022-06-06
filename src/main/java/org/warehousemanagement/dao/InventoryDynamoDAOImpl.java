@@ -129,12 +129,12 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
                 transactWrites.add(new TransactWriteItem().withUpdate(updateCapacityExpression));
 
 
-                TransactWriteItemsRequest addInventoryTransaction = new TransactWriteItemsRequest()
-                        .withTransactItems(transactWrites).withClientRequestToken(uniqueProductIds.get(0))
+                TransactWriteItemsRequest inboundInventoryTransaction = new TransactWriteItemsRequest()
+                        .withTransactItems(transactWrites)
                         .withReturnConsumedCapacity(ReturnConsumedCapacity.TOTAL);
 
 
-                amazonDynamoDBClient.transactWriteItems(addInventoryTransaction);
+                amazonDynamoDBClient.transactWriteItems(inboundInventoryTransaction);
             }
         } catch (TransactionCanceledException tce) {
             List<CancellationReason> cancellationReasons = tce.getCancellationReasons();
@@ -162,6 +162,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
      */
     public void outbound(InventoryOutboundRequest outboundRequest) {
         try {
+            Preconditions.checkArgument(outboundRequest!= null, "outboundRequest cannot be null");
             List<String> uniqueProductIds = outboundRequest.getUniqueProductIds();
             Preconditions.checkArgument(outboundRequest != null, "outboundRequest cannot be null");
             String containerId = outboundRequest.getContainerId();
@@ -177,12 +178,12 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
                 transactWrites.add(new TransactWriteItem().withUpdate(updateCapacityExpression));
 
 
-                TransactWriteItemsRequest addInventoryTransaction = new TransactWriteItemsRequest()
-                        .withTransactItems(transactWrites).withClientRequestToken(uniqueProductIds.get(0))
+                TransactWriteItemsRequest outboundInventoryTransaction = new TransactWriteItemsRequest()
+                        .withTransactItems(transactWrites)
                         .withReturnConsumedCapacity(ReturnConsumedCapacity.TOTAL);
 
 
-                amazonDynamoDBClient.transactWriteItems(addInventoryTransaction);
+                amazonDynamoDBClient.transactWriteItems(outboundInventoryTransaction);
 
             }
         } catch (TransactionCanceledException tce) {
@@ -198,7 +199,6 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         } catch (InternalServerErrorException e) {
             throw new RetriableException("Exception occurred", e);
         } catch (Exception e) {
-            log.error("error occurred whiile outbound ", outboundRequest.getOutboundId(), e);
             throw new NonRetriableException("Exception occurred", e);
         }
     }

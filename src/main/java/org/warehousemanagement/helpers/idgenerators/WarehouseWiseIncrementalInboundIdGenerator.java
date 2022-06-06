@@ -1,6 +1,8 @@
-package org.warehousemanagement.idgenerators;
+package org.warehousemanagement.helpers.idgenerators;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import org.warehousemanagement.dao.InboundDAO;
 import org.warehousemanagement.entities.dynamodb.FinishedGoodsInbound;
 import org.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.warehousemanagement.dao.InboundDynamoDAOImpl;
@@ -11,18 +13,19 @@ public class WarehouseWiseIncrementalInboundIdGenerator implements InboundIdGene
 
     public static final String INBOUND = "INBOUND-" ;
     public static final String FIRST_INBOUND_ID = "INBOUND-1";
-    InboundDynamoDAOImpl inboundDbSAO;
+    InboundDAO inboundDAO;
 
     @Inject
-    public WarehouseWiseIncrementalInboundIdGenerator(InboundDynamoDAOImpl inboundDbSAO) {
-        this.inboundDbSAO = inboundDbSAO;
+    public WarehouseWiseIncrementalInboundIdGenerator(InboundDAO inboundDAO) {
+        this.inboundDAO = inboundDAO;
     }
 
     @Override
     public String generate(StartInboundRequest startInboundRequest) {
 
+        Preconditions.checkArgument(startInboundRequest!=null, "startInboudrequest cannot be null");
         String warehouseId = startInboundRequest.getWarehouseId();
-        Optional<FinishedGoodsInbound> lastInbound = inboundDbSAO.getLastInbound(warehouseId);
+        Optional<FinishedGoodsInbound> lastInbound = inboundDAO.getLastInbound(warehouseId);
         if(lastInbound.isPresent())
         {
             String locationId = lastInbound.get().getInboundId();

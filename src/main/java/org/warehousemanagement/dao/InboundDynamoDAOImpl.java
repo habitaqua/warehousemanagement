@@ -16,11 +16,9 @@ import org.warehousemanagement.entities.exceptions.ResourceAlreadyExistsExceptio
 import org.warehousemanagement.entities.exceptions.RetriableException;
 import org.warehousemanagement.entities.inbound.FGInboundDTO;
 import org.warehousemanagement.entities.inbound.inboundstatus.InboundStatus;
+import org.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -78,7 +76,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             if( newInboundStatus!=null) {
                 List<AttributeValue> allowedStatuses = newInboundStatus.previousStates()
                         .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
-                expected.put("status", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
+                expected.put("inboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                         .withAttributeValueList(allowedStatuses));
             }
 
@@ -126,5 +124,17 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             log.error("Non Retriable Error occured while getting last inbound", e);
             throw new NonRetriableException(e);
         }
+    }
+
+    private String getAppendedStatusString(InboundStatus inboundStatus, Map<String, AttributeValue> updatedAttributes) {
+        List<String> previousValues = new ArrayList<>();
+        for (int i = 0; i < inboundStatus.previousStates().size(); i++) {
+            String key = ":is" + (i + 1);
+            updatedAttributes.put(key,
+                    new AttributeValue().withS(inboundStatus.previousStates().get(i).getStatus()));
+            previousValues.add(key);
+        }
+        String previousStatus = String.join(", ", previousValues);
+        return previousStatus;
     }
 }
