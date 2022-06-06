@@ -329,7 +329,7 @@ public class TestInboundDynamoDAOImpl {
         expected.put("inboundId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getInboundId())));
         if (fgInboundDTO.getStatus() != null) {
             List<AttributeValue> allowedStatuses = fgInboundDTO.getStatus().previousStates()
-                    .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
+                    .stream().map(v -> new AttributeValue().withS(v.toString())).collect(Collectors.toList());
             expected.put("inboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                     .withAttributeValueList(allowedStatuses));
         }

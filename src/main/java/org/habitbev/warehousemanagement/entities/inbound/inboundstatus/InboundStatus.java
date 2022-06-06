@@ -7,5 +7,5 @@ public interface InboundStatus {
 
     List<InboundStatus> previousStates();
 
-    String getStatus();
+    String toString();
 }

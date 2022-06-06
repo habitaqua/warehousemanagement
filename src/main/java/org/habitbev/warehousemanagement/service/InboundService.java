@@ -20,7 +20,7 @@ public class InboundService {
     private Clock clock;
 
     @Inject
-    public InboundService(InboundDynamoDAOImpl inboundSAO, InboundIdGenerator inboundIdGenerator, Clock clock) {
+    public InboundService(InboundDAO inboundSAO, InboundIdGenerator inboundIdGenerator, Clock clock) {
         this.inboundDAO = inboundSAO;
         this.inboundIdGenerator = inboundIdGenerator;
         this.clock = clock;
@@ -47,6 +47,8 @@ public class InboundService {
     }
 
     public void endInbound(EndInboundRequest endInboundRequest) {
+
+        Preconditions.checkArgument(endInboundRequest != null, "endInboundRequest cannot be null");
 
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(endInboundRequest.getInboundId())
                 .warehouseId(endInboundRequest.getWarehouseId()).status(new Closed()).endTime(clock.millis()).build();

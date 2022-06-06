@@ -12,7 +12,7 @@ public class Closed implements InboundStatus{
     }
 
     @Override
-    public String getStatus() {
+    public String toString() {
         return "CLOSED";
     }
 }

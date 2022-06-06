@@ -7,5 +7,7 @@ public interface OutboundStatus {
 
     Set<OutboundStatus> previousStates();
 
-    String getStatus();
+    String toString();
+
+
 }

@@ -74,7 +74,7 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
 
             if (newOutboundStatus != null) {
                 List<AttributeValue> allowedStatuses = newOutboundStatus.previousStates()
-                        .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
+                        .stream().map(v -> new AttributeValue().withS(v.toString())).collect(Collectors.toList());
                 expected.put("outboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                         .withAttributeValueList(allowedStatuses));
             }

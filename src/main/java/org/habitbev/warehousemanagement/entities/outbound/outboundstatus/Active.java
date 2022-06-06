@@ -11,7 +11,9 @@ public class Active implements OutboundStatus {
     }
 
     @Override
-    public String getStatus() {
+    public String toString() {
         return "ACTIVE";
     }
+
+
 }

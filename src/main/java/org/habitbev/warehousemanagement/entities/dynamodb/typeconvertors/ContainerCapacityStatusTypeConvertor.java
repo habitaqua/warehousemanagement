@@ -2,7 +2,7 @@ package org.habitbev.warehousemanagement.entities.dynamodb.typeconvertors;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTypeConverter;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.*;
-import org.warehousemanagement.entities.container.containerstatus.*;
+import org.habitbev.warehousemanagement.entities.container.containerstatus.*;
 
 public class ContainerCapacityStatusTypeConvertor implements DynamoDBTypeConverter<String, ContainerStatus> {
     @Override

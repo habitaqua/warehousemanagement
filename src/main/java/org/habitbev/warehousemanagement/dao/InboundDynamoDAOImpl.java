@@ -73,7 +73,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             expected.put("inboundId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getInboundId())));
             if( newInboundStatus!=null) {
                 List<AttributeValue> allowedStatuses = newInboundStatus.previousStates()
-                        .stream().map(v -> new AttributeValue().withS(v.getStatus())).collect(Collectors.toList());
+                        .stream().map(v -> new AttributeValue().withS(v.toString())).collect(Collectors.toList());
                 expected.put("inboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
                         .withAttributeValueList(allowedStatuses));
             }
@@ -129,7 +129,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         for (int i = 0; i < inboundStatus.previousStates().size(); i++) {
             String key = ":is" + (i + 1);
             updatedAttributes.put(key,
-                    new AttributeValue().withS(inboundStatus.previousStates().get(i).getStatus()));
+                    new AttributeValue().withS(inboundStatus.previousStates().get(i).toString()));
             previousValues.add(key);
         }
         String previousStatus = String.join(", ", previousValues);

@@ -9,7 +9,7 @@ public class OutboundStatusTypeConvertor implements DynamoDBTypeConverter<String
 
     @Override
     public String convert(OutboundStatus outboundStatus) {
-        return outboundStatus.getStatus();
+        return outboundStatus.toString();
     }
     @Override
     public OutboundStatus unconvert(String outboundStatusString) {
