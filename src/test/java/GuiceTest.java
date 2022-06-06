@@ -1,4 +1,4 @@
-import org.warehousemanagement.lambda.BulkBarcodesGenerationHandler;
+import org.habitbev.warehousemanagement.lambda.BulkBarcodesGenerationHandler;
 
 public class GuiceTest {
 
