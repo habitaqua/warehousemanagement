@@ -31,12 +31,20 @@ public class FGInboundDTO {
         this.inboundId = inboundId;
         this.status = status;
         this.userId = userId;
-        this.startTime =startTime;
+        this.startTime = startTime;
         this.endTime = endTime;
         this.modifiedTime = modifiedTime;
     }
 
-   public FinishedGoodsInbound toDbEntity() {
+    public static FGInboundDTO fromDbEntity(FinishedGoodsInbound db) {
+        Preconditions.checkArgument(db != null, "db entory cannot be null");
+        return FGInboundDTO.builder().inboundId(db.getInboundId()).warehouseId(db.getWarehouseId())
+                .userId(db.getUserId()).status(db.getInboundStatus()).modifiedTime(db.getModifiedTime())
+                .startTime(db.getStartTime()).endTime(db.getEndTime()).build();
+
+    }
+
+    public FinishedGoodsInbound toDbEntity() {
         FinishedGoodsInbound inbound = FinishedGoodsInbound.builder().warehouseId(this.getWarehouseId())
                 .inboundId(this.getInboundId()).startTime(this.getStartTime()).endTime(this.getEndTime())
                 .modifiedTime(this.modifiedTime).inboundStatus(this.getStatus()).userId(this.getUserId()).build();

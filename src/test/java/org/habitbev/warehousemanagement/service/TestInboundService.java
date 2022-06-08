@@ -4,12 +4,16 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.StringAssert;
 import org.habitbev.warehousemanagement.dao.InboundDAO;
+import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
 import org.habitbev.warehousemanagement.entities.inbound.EndInboundRequest;
 import org.habitbev.warehousemanagement.entities.inbound.FGInboundDTO;
 import org.habitbev.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.habitbev.warehousemanagement.entities.inbound.inboundstatus.Active;
 import org.habitbev.warehousemanagement.entities.inbound.inboundstatus.Closed;
+import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
 import org.habitbev.warehousemanagement.helpers.idgenerators.InboundIdGenerator;
+import org.habitbev.warehousemanagement.helpers.validators.WarehouseAction;
+import org.habitbev.warehousemanagement.helpers.validators.WarehouseActionValidatorChain;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,13 +40,19 @@ public class TestInboundService {
     InboundIdGenerator<StartInboundRequest> inboundIdGenerator;
     @Mock
     Clock clock;
+
+    @Mock
+    WarehouseActionValidatorChain warehouseActionValidatorChain;
     @Captor
     ArgumentCaptor<FGInboundDTO> fgInboundDTOArgumentCaptor;
+
+    @Captor
+    ArgumentCaptor<WarehouseActionValidationRequest> warehouseActionValidationRequestArgumentCaptor;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        inboundService = new InboundService(inboundDAO, inboundIdGenerator, clock);
+        inboundService = new InboundService(inboundDAO, inboundIdGenerator, clock, warehouseActionValidatorChain);
         Mockito.when(clock.millis()).thenReturn(EPOCH_MILLI);
     }
 
@@ -103,11 +113,19 @@ public class TestInboundService {
     public void test_end_inbound_success() {
 
         EndInboundRequest endInboundRequest = EndInboundRequest.builder().warehouseId(WAREHOUSE_1).inboundId(INBOUND_1).build();
+        WarehouseActionValidationRequest expectedWarehouseActionValidationRequest = WarehouseActionValidationRequest.builder()
+                .inboundId(endInboundRequest.getInboundId()).warehouseId(endInboundRequest.getWarehouseId()).warehouseAction(WarehouseAction.END_INBOUND).build();
+        FGInboundDTO expectedInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).endTime(EPOCH_MILLI).status(new Closed()).warehouseId(WAREHOUSE_1).build();
+        WarehouseValidatedEntities warehouseValidatedEntities = new WarehouseValidatedEntities.Builder().fgInboundDTO(expectedInboundDTO).build();
+        Mockito.when(warehouseActionValidatorChain.execute(any(WarehouseActionValidationRequest.class))).thenReturn(warehouseValidatedEntities);
+
         inboundService.endInbound(endInboundRequest);
         Mockito.verify(inboundDAO).update(fgInboundDTOArgumentCaptor.capture());
         FGInboundDTO actualInboundDTO = fgInboundDTOArgumentCaptor.getValue();
-        FGInboundDTO expectedInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).endTime(EPOCH_MILLI).status(new Closed()).warehouseId(WAREHOUSE_1).build();
         new ObjectAssert<>(expectedInboundDTO).usingRecursiveComparison().isEqualTo(actualInboundDTO);
+        Mockito.verify(warehouseActionValidatorChain).execute(warehouseActionValidationRequestArgumentCaptor.capture());
+        WarehouseActionValidationRequest actualWarehouseActionValidationRequest = warehouseActionValidationRequestArgumentCaptor.getValue();
+        new ObjectAssert<>(actualWarehouseActionValidationRequest).usingRecursiveComparison().isEqualTo(expectedWarehouseActionValidationRequest);
         Mockito.verify(clock).millis();
         Mockito.verifyNoMoreInteractions(inboundDAO, clock);
         Mockito.verifyZeroInteractions(inboundIdGenerator);
@@ -127,11 +145,16 @@ public class TestInboundService {
     public void test_end_inbound_exception() {
 
         EndInboundRequest endInboundRequest = EndInboundRequest.builder().warehouseId(WAREHOUSE_1).inboundId(INBOUND_1).build();
+        WarehouseActionValidationRequest expectedWarehouseActionValidationRequest = WarehouseActionValidationRequest.builder()
+                .inboundId(endInboundRequest.getInboundId()).warehouseId(endInboundRequest.getWarehouseId()).warehouseAction(WarehouseAction.END_INBOUND).build();
+        FGInboundDTO expectedInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).endTime(EPOCH_MILLI).status(new Closed()).warehouseId(WAREHOUSE_1).build();
+        WarehouseValidatedEntities warehouseValidatedEntities = new WarehouseValidatedEntities.Builder().fgInboundDTO(expectedInboundDTO).build();
+        Mockito.when(warehouseActionValidatorChain.execute(any(WarehouseActionValidationRequest.class))).thenReturn(warehouseValidatedEntities);
+
         Mockito.doThrow(RuntimeException.class).when(inboundDAO).update(any(FGInboundDTO.class));
         Assertions.assertThatExceptionOfType(RuntimeException.class).isThrownBy(()-> inboundService.endInbound(endInboundRequest));
         Mockito.verify(inboundDAO).update(fgInboundDTOArgumentCaptor.capture());
         FGInboundDTO actualInboundDTO = fgInboundDTOArgumentCaptor.getValue();
-        FGInboundDTO expectedInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).endTime(EPOCH_MILLI).status(new Closed()).warehouseId(WAREHOUSE_1).build();
         new ObjectAssert<>(actualInboundDTO).usingRecursiveComparison().isEqualTo(expectedInboundDTO);
         Mockito.verify(clock).millis();
         Mockito.verifyNoMoreInteractions(inboundDAO, clock);

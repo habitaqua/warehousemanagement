@@ -2,6 +2,7 @@ package org.habitbev.warehousemanagement.helpers.idgenerators;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.habitbev.warehousemanagement.dao.ContainerDAO;
 import org.habitbev.warehousemanagement.entities.container.ContainerDTO;
 import org.habitbev.warehousemanagement.entities.container.AddContainerRequest;
@@ -17,7 +18,7 @@ public class WarehouseWiseIncrementalContainerIdGenerator implements ContainerId
     ContainerDAO containerDAO;
 
     @Inject
-    public WarehouseWiseIncrementalContainerIdGenerator(ContainerDAO containerDAO) {
+    public WarehouseWiseIncrementalContainerIdGenerator(@Named("dynamoDbImpl") ContainerDAO containerDAO) {
         this.containerDAO = containerDAO;
     }
 

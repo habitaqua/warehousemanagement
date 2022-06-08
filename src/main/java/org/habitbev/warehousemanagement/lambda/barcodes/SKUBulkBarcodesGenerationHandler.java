@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.lambda;
+package org.habitbev.warehousemanagement.lambda.barcodes;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -12,14 +12,14 @@ import org.habitbev.warehousemanagement.guice.MainModule;
 
 import java.util.Map;
 
-public class BulkBarcodesGenerationHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
+public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
     private org.habitbev.warehousemanagement.service.SKUBulkBarcodesCreationService SKUBulkBarcodesCreationService;
     private ObjectMapper objectMapper;
     private Injector injector;
 
 
-    public BulkBarcodesGenerationHandler() {
+    public SKUBulkBarcodesGenerationHandler() {
         System.out.println("injection started");
         this.injector = Guice.createInjector(new MainModule());
         System.out.println("injection started1");

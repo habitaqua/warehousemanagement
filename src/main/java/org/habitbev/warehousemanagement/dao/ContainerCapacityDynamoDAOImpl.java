@@ -25,7 +25,6 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
 
     private static final String DELIMITER = "<%>";
     DynamoDBMapper containerCapacityDynamoDbMapper;
-
     Clock clock;
 
     @Inject

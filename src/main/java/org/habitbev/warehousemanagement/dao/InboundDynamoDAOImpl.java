@@ -29,6 +29,21 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         this.inboundDynamoDbMapper = inboundDynamoDbMapper;
     }
 
+    @Override
+    public Optional<FinishedGoodsInbound> get(String warehouseId, String inboundId) {
+        try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
+            Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank or null");
+            FinishedGoodsInbound finishedGoodsInbound = inboundDynamoDbMapper.load(FinishedGoodsInbound.class, warehouseId, inboundId);
+            return Optional.ofNullable(finishedGoodsInbound);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (InternalServerErrorException e) {
+            log.error("Retriable Error occured while fetching inbound", e);
+            throw new RetriableException(e);
+        }
+    }
+
     /**
      * Add the given inbound details only if there is no inbound with same id in the warehouse
      *
@@ -71,7 +86,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             Map expected = new HashMap();
             expected.put("warehouseId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getWarehouseId())));
             expected.put("inboundId", new ExpectedAttributeValue(new AttributeValue(fgInboundDTO.getInboundId())));
-            if( newInboundStatus!=null) {
+            if (newInboundStatus != null) {
                 List<AttributeValue> allowedStatuses = newInboundStatus.previousStates()
                         .stream().map(v -> new AttributeValue().withS(v.toString())).collect(Collectors.toList());
                 expected.put("inboundStatus", new ExpectedAttributeValue().withComparisonOperator(ComparisonOperator.IN)
@@ -84,7 +99,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         } catch (InternalServerErrorException ie) {
             log.error("Retriable Error occured while updating inbound", ie);
             throw new RetriableException(ie);
-        } catch (ConditionalCheckFailedException ce ) {
+        } catch (ConditionalCheckFailedException ce) {
             log.error("conditional check occured while updating inbound", ce.getCause());
             throw new NonRetriableException(ce);
         } catch (Exception e) {

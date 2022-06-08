@@ -1,5 +1,6 @@
 package org.habitbev.warehousemanagement.dao;
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
@@ -37,7 +38,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
     private static final String INVENTORY_TABLE_NAME = "inventory";
     private static final String CONTAINER_CAPACITY_TABLE_NAME = "container-capacity";
     private static final String COMMA = ",";
-    AmazonDynamoDBClient amazonDynamoDBClient;
+    AmazonDynamoDB amazonDynamoDBClient;
     DynamoDBMapper inventoryDynamoDbMapper;
     ContainerCapacityDAO containerCapacityDAO;
 
@@ -45,7 +46,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
     Clock clock;
 
     @Inject
-    public InventoryDynamoDAOImpl(AmazonDynamoDBClient amazonDynamoDBClient, DynamoDBMapper inventoryDynamoDbMapper,
+    public InventoryDynamoDAOImpl(AmazonDynamoDB amazonDynamoDBClient, DynamoDBMapper inventoryDynamoDbMapper,
                                   ContainerStatusDeterminer containerStatusDeterminer, ContainerCapacityDAO containerCapacityDAO,
                                   Clock clock) {
         this.amazonDynamoDBClient = amazonDynamoDBClient;

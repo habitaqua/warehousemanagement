@@ -9,6 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.habitbev.warehousemanagement.entities.dynamodb.FinishedGoodsInbound;
 import org.habitbev.warehousemanagement.entities.dynamodb.FinishedGoodsOutbound;
 import org.habitbev.warehousemanagement.entities.outbound.OutboundDTO;
 import org.habitbev.warehousemanagement.entities.outbound.outboundstatus.OutboundStatus;
@@ -31,6 +32,21 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
     @Inject
     public OutboundDynamoDAOImpl(DynamoDBMapper outboundDynamoDbMapper) {
         this.outboundDynamoDbMapper = outboundDynamoDbMapper;
+    }
+
+    @Override
+    public Optional<FinishedGoodsOutbound> get(String warehouseId, String outboundId) {
+        try {
+            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
+            Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank or null");
+            FinishedGoodsOutbound finishedGoodsOutbound = outboundDynamoDbMapper.load(FinishedGoodsOutbound.class, warehouseId, outboundId);
+            return Optional.ofNullable(finishedGoodsOutbound);
+        } catch (IllegalArgumentException e) {
+            throw e;
+        } catch (InternalServerErrorException e) {
+            log.error("Retriable Error occured while fetching inbound", e);
+            throw new RetriableException(e);
+        }
     }
 
     public void add(OutboundDTO outboundDTO) {

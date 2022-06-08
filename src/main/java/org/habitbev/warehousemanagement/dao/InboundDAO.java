@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface InboundDAO {
 
+    Optional<FinishedGoodsInbound>  get(String warehouseId, String inboundId);
     void add(FGInboundDTO fgInboundDTO);
 
     void update(FGInboundDTO fgInboundDTO);

@@ -2,6 +2,7 @@ package org.habitbev.warehousemanagement.helpers.idgenerators;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.habitbev.warehousemanagement.dao.OutboundDAO;
 import org.habitbev.warehousemanagement.entities.dynamodb.FinishedGoodsOutbound;
 import org.habitbev.warehousemanagement.entities.outbound.StartOutboundRequest;
@@ -15,7 +16,7 @@ public class WarehouseWiseIncrementalOutboundIdGenerator implements OutboundIdGe
     OutboundDAO outboundDAO;
 
     @Inject
-    public WarehouseWiseIncrementalOutboundIdGenerator(OutboundDAO outboundDAO) {
+    public WarehouseWiseIncrementalOutboundIdGenerator(@Named("dynamoDbImpl") OutboundDAO outboundDAO) {
         this.outboundDAO = outboundDAO;
     }
 

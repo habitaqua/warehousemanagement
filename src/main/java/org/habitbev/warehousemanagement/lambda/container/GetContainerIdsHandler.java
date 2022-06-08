@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.lambda.location;
+package org.habitbev.warehousemanagement.lambda.container;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
@@ -11,14 +11,14 @@ import org.habitbev.warehousemanagement.service.ContainerService;
 
 import java.util.Map;
 
-public class GetLocationIdsHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
+public class GetContainerIdsHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
 
     private ContainerService containerService;
     private ObjectMapper objectMapper;
     private Injector injector;
 
-    public GetLocationIdsHandler(ContainerService containerService, ObjectMapper objectMapper, Injector injector) {
+    public GetContainerIdsHandler(ContainerService containerService, ObjectMapper objectMapper, Injector injector) {
         this.injector = Guice.createInjector(new MainModule());
         this.containerService = injector.getInstance(ContainerService.class);
         this.objectMapper = injector.getInstance(ObjectMapper.class);

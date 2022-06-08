@@ -1,16 +1,21 @@
 package org.habitbev.warehousemanagement.entities.outbound;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
-@Value
+@Getter
+@Setter(AccessLevel.PRIVATE)
+@ToString
+@NoArgsConstructor
 public class StartOutboundRequest {
 
+    @JsonProperty("userId")
     private String userId;
+    @JsonProperty("warehouseId")
     private String warehouseId;
-
+    @JsonProperty("customerId")
     private String customerId;
 
     @Builder

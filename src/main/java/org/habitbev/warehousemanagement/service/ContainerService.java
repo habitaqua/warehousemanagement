@@ -1,6 +1,8 @@
 package org.habitbev.warehousemanagement.service;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.habitbev.warehousemanagement.entities.PaginatedResponse;
 import org.habitbev.warehousemanagement.entities.container.GetContainerRequest;
 import org.habitbev.warehousemanagement.entities.container.GetContainersRequest;
@@ -24,14 +26,16 @@ public class ContainerService {
     ContainerIdGenerator<AddContainerRequest> containerIdGenerator;
 
     @Inject
-    public ContainerService(ContainerDAO containerDAO, ContainerCapacityService containerCapacityService,
-                            ContainerIdGenerator<AddContainerRequest> containerIdGenerator) {
+    public ContainerService(@Named("dynamoDbImpl") ContainerDAO containerDAO, ContainerCapacityService containerCapacityService,
+                            @Named("warehouseWiseIncrementalContainerIdGenerator") ContainerIdGenerator<AddContainerRequest> containerIdGenerator) {
         this.containerDAO = containerDAO;
         this.containerCapacityService = containerCapacityService;
         this.containerIdGenerator = containerIdGenerator;
     }
 
     public String add(AddContainerRequest addContainerRequest) {
+
+        Preconditions.checkArgument(addContainerRequest != null, "addContainerRequest cannot be null");
 
         String warehouseId = addContainerRequest.getWarehouseId();
         synchronized (warehouseId) {

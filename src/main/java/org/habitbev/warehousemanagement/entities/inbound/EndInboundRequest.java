@@ -1,17 +1,22 @@
 package org.habitbev.warehousemanagement.entities.inbound;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * Ends the given inbound id at the given warehouseId
  */
-@Value
+@Getter
+@Setter(AccessLevel.PRIVATE)
+@ToString
+@NoArgsConstructor
 public class EndInboundRequest {
 
+    @JsonProperty("inboundId")
     private String inboundId;
+    @JsonProperty("warehouseId")
     private String warehouseId;
 
     @Builder

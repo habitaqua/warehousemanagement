@@ -15,11 +15,12 @@ public class AddContainerRequest {
     @JsonProperty("warehouseId")
     String warehouseId;
 
+    @JsonProperty("skuCodeWisePredefinedCapacity")
     Map<String, Integer> skuCodeWisePredefinedCapacity;
 
 
     @Builder
-    public AddContainerRequest(String warehouseId, Map<String, Integer> skuCodeWisePredefinedCapacity) {
+    private AddContainerRequest(String warehouseId, Map<String, Integer> skuCodeWisePredefinedCapacity) {
 
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseid cannot be blank");
         Preconditions.checkArgument(Utilities.validateContainerPredefinedCapacities(skuCodeWisePredefinedCapacity),

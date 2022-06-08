@@ -11,6 +11,7 @@ public class InconsistentStateException extends NonRetriableException{
         super(message);
     }
 
+
     public InconsistentStateException(String message, Throwable cause) {
         super(message, cause);
     }

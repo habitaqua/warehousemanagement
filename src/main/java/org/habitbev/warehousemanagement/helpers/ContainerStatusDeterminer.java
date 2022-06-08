@@ -1,6 +1,7 @@
 package org.habitbev.warehousemanagement.helpers;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.Available;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.ContainerStatus;

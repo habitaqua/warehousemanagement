@@ -38,6 +38,12 @@ public class OutboundDTO {
         this.modifiedTime = modifiedTime;
     }
 
+    public static OutboundDTO fromDbEntity(FinishedGoodsOutbound db) {
+        return OutboundDTO.builder().outboundId(db.getOutboundId()).startTime(db.getStartTime()).warehouseId(db.getWarehouseId())
+                .status(db.getOutboundStatus()).userId(db.getUserId()).modifiedTime(db.getModifiedTime()).customerId(db.getCustomerId()).endTime(db.getEndTime()).build();
+
+    }
+
     public FinishedGoodsOutbound toDbEntity() {
         FinishedGoodsOutbound outbound = FinishedGoodsOutbound.builder().warehouseId(this.getWarehouseId())
                 .outboundId(this.getOutboundId()).customerId(this.getCustomerId()).startTime(this.getStartTime())
