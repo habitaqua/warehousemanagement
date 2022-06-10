@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - mvn clean install
+artifacts:
+  files:
+    - target/WarehouseManagement-1.0-SNAPSHOT-jar-with-dependencies.jar
+    - appspec.yml
+  discard-paths: yes

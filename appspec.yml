@@ -1,0 +1,5 @@
+version: 0.0
+os: linux
+files:
+  - source: ./WarehouseManagement-1.0-SNAPSHOT-jar-with-dependencies.jar
+    destination: /tmp
