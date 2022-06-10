@@ -60,13 +60,13 @@ public class MainModule extends AbstractModule {
         new MainModule().configure();
     }
     private void bindProperties() {
-        String domain = "test";
+        String domain = "beta";
         Properties properties = new Properties();
         try {
             if ("prod".equals(domain)) {
                 properties.load(getClass().getClassLoader().getResourceAsStream("prod.config"));
             } else {
-                properties.load(getClass().getClassLoader().getResourceAsStream("test.config"));
+                properties.load(getClass().getClassLoader().getResourceAsStream("beta.config"));
 
             }
         } catch (IOException e) {

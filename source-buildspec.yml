@@ -11,3 +11,6 @@ artifacts:
     - target/WarehouseManagement-1.0-SNAPSHOT-jar-with-dependencies.jar
     - appspec.yml
   discard-paths: yes
+cache:
+  paths:
+    - '/root/.m2/**/*'
