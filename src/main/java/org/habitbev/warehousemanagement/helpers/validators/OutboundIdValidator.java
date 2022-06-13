@@ -2,6 +2,7 @@ package org.habitbev.warehousemanagement.helpers.validators;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.dao.OutboundDAO;
 import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
@@ -22,7 +23,7 @@ public class OutboundIdValidator implements WarehouseActionEntitiesValidator {
     OutboundDAO outboundDAO;
 
     @Inject
-    public OutboundIdValidator(OutboundDAO outboundDAO) {
+    public OutboundIdValidator(@Named("dynamoDbImpl") OutboundDAO outboundDAO) {
         this.outboundDAO = outboundDAO;
     }
 
