@@ -1,6 +1,7 @@
 package org.habitbev.warehousemanagement.helpers.validators;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
 import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
@@ -11,6 +12,7 @@ public class SKUCodeValidator implements WarehouseActionEntitiesValidator {
 
     SKUService skuService;
 
+    @Inject
     public SKUCodeValidator(SKUService skuService) {
         this.skuService = skuService;
     }
