@@ -93,9 +93,9 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_add_input_null_non_retriable_exception() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> inboundDbSAO.add(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO cannot be null");
+                .withMessageContaining("fgInboundDTO cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -107,9 +107,9 @@ public class TestInboundDynamoDAOImpl {
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.status cannot be null");
+                .withMessageContaining("fgInboundDTO.status cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -122,9 +122,9 @@ public class TestInboundDynamoDAOImpl {
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .modifiedTime(startTime).userId(USER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.startTime cannot be null");
+                .withMessageContaining("fgInboundDTO.startTime cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -137,9 +137,9 @@ public class TestInboundDynamoDAOImpl {
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> inboundDbSAO.add(fgInboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("fgInboundDTO.userId cannot be blank or null");
+                .withMessageContaining("fgInboundDTO.userId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
