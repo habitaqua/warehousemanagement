@@ -71,6 +71,8 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             log.error("Inbound", fgInboundDTO.getInboundId(), " already exist in given warehouse",
                     fgInboundDTO.getWarehouseId(), ce);
             throw new ResourceAlreadyExistsException(ce);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (Exception e) {
             log.error("Non Retriable Error occured while starting inbound", e);
             throw new NonRetriableException(e);

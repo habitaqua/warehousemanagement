@@ -13,6 +13,7 @@ import org.habitbev.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.habitbev.warehousemanagement.guice.MainModule;
 import org.habitbev.warehousemanagement.service.InboundService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -37,9 +38,11 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
             StartInboundRequest startInboundRequest = objectMapper.readValue(String.valueOf(input.get("body")),
                     StartInboundRequest.class);
             String locationId = inboundService.startInbound(startInboundRequest);
+            Map<String, String> response = new HashMap<>();
+            response.put("locationId", locationId);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody(locationId)
+                    .withBody(objectMapper.writeValueAsString(response))
                     .withIsBase64Encoded(false);
         } catch (IllegalArgumentException e) {
             log.error("invalid input for start inbound request", e);
