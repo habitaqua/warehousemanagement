@@ -24,11 +24,8 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
 
     public StartInboundHandler() {
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.inboundService = injector.getInstance(InboundService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
     }
 
     @Override
@@ -37,9 +34,9 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
             Preconditions.checkArgument(input != null , "StartInboundHandler.input cannot be null");
             StartInboundRequest startInboundRequest = objectMapper.readValue(String.valueOf(input.get("body")),
                     StartInboundRequest.class);
-            String locationId = inboundService.startInbound(startInboundRequest);
+            String inboundId = inboundService.startInbound(startInboundRequest);
             Map<String, String> response = new HashMap<>();
-            response.put("locationId", locationId);
+            response.put("inboundId", inboundId);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
                     .withBody(objectMapper.writeValueAsString(response))
@@ -48,11 +45,13 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
             log.error("invalid input for start inbound request", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
+                    .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
+                    .withBody(e.getCause().getMessage())
                     .withIsBase64Encoded(false);
         }
     }

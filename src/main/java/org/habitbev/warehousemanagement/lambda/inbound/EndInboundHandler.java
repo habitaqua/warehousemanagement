@@ -12,6 +12,7 @@ import org.habitbev.warehousemanagement.entities.inbound.EndInboundRequest;
 import org.habitbev.warehousemanagement.guice.MainModule;
 import org.habitbev.warehousemanagement.service.InboundService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -34,18 +35,22 @@ public class EndInboundHandler implements RequestHandler<Map<String, Object>, AP
             EndInboundRequest endInboundRequest = objectMapper.readValue(String.valueOf(input.get("body")),
                     EndInboundRequest.class);
             inboundService.endInbound(endInboundRequest);
+            Map<String, String> response = new HashMap<>();
+            response.put("inboundId", endInboundRequest.getInboundId());
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody("success")
+                    .withBody(objectMapper.writeValueAsString(response))
                     .withIsBase64Encoded(false);
         } catch (IllegalArgumentException e) {
             log.error("invalid input for end inbound request", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
+                    .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
+                    .withBody(e.getCause().getMessage())
                     .withStatusCode(500)
                     .withIsBase64Encoded(false);
         }

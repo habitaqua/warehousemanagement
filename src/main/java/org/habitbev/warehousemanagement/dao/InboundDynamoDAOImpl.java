@@ -98,6 +98,8 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             inboundDynamoDbMapper.save(fgInboundDTO.toDbEntity(), dynamoDBSaveExpression);
 
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (InternalServerErrorException ie) {
             log.error("Retriable Error occured while updating inbound", ie);
             throw new RetriableException(ie);
