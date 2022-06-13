@@ -8,6 +8,8 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
+import com.google.inject.name.Names;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.ContainerStatus;
@@ -47,7 +49,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
 
     @Inject
     public InventoryDynamoDAOImpl(AmazonDynamoDB amazonDynamoDBClient, DynamoDBMapper inventoryDynamoDbMapper,
-                                  ContainerStatusDeterminer containerStatusDeterminer, ContainerCapacityDAO containerCapacityDAO,
+                                  ContainerStatusDeterminer containerStatusDeterminer, @Named("dynamoDbImpl")ContainerCapacityDAO containerCapacityDAO,
                                   Clock clock) {
         this.amazonDynamoDBClient = amazonDynamoDBClient;
         this.inventoryDynamoDbMapper = inventoryDynamoDbMapper;

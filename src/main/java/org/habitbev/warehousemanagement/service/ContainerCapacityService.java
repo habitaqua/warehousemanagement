@@ -2,6 +2,7 @@ package org.habitbev.warehousemanagement.service;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.name.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.dao.ContainerCapacityDAO;
 import org.habitbev.warehousemanagement.entities.dynamodb.ContainerCapacity;
@@ -13,7 +14,7 @@ public class ContainerCapacityService {
     ContainerCapacityDAO containerCapacityDAO;
 
     @Inject
-    public ContainerCapacityService(ContainerCapacityDAO containerCapacityDAO) {
+    public ContainerCapacityService(@Named("dynamoDbImpl") ContainerCapacityDAO containerCapacityDAO) {
         this.containerCapacityDAO = containerCapacityDAO;
     }
 
