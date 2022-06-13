@@ -2,6 +2,7 @@ package org.habitbev.warehousemanagement.service;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.dao.SKUDAO;
@@ -18,6 +19,7 @@ public class SKUService{
 
     SKUDAO skudao;
 
+    @Inject
     public SKUService(@Named("configSKUDAOImpl") SKUDAO skudao) {
         this.skudao = skudao;
     }
