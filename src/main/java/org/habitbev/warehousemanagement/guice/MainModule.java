@@ -12,8 +12,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import org.habitbev.warehousemanagement.dao.*;
+import org.habitbev.warehousemanagement.entities.UniqueProductIdsGenerationRequest;
+import org.habitbev.warehousemanagement.entities.container.AddContainerRequest;
+import org.habitbev.warehousemanagement.entities.inbound.StartInboundRequest;
+import org.habitbev.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.habitbev.warehousemanagement.guice.providers.WarehouseActionValidatorChainProvider;
 import org.habitbev.warehousemanagement.helpers.BarcodesPersistor;
 import org.habitbev.warehousemanagement.helpers.S3BarcodesPersistor;
@@ -50,10 +55,10 @@ public class MainModule extends AbstractModule {
     }
 
     private void bindIdGenerators() {
-        bind(ContainerIdGenerator.class).annotatedWith(Names.named("warehouseWiseIncrementalContainerIdGenerator")).to(WarehouseWiseIncrementalContainerIdGenerator.class);
-        bind(InboundIdGenerator.class).annotatedWith(Names.named("warehouseWiseIncrementalInboundIdGenerator")).to(WarehouseWiseIncrementalInboundIdGenerator.class);
-        bind(OutboundIdGenerator.class).annotatedWith(Names.named("warehouseWiseIncrementalOutboundIdGenerator")).to(WarehouseWiseIncrementalOutboundIdGenerator.class);
-        bind(ProductIdGenerator.class).annotatedWith(Names.named("productionTimeBasedUniqueProductIdGenerator")).to(ProductionTimeBasedUniqueProductIdGenerator.class);
+        bind(new TypeLiteral<ContainerIdGenerator<AddContainerRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalContainerIdGenerator")).to(WarehouseWiseIncrementalContainerIdGenerator.class);
+        bind(new TypeLiteral<InboundIdGenerator<StartInboundRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalInboundIdGenerator")).to(WarehouseWiseIncrementalInboundIdGenerator.class);
+        bind(new TypeLiteral<OutboundIdGenerator<StartOutboundRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalOutboundIdGenerator")).to(WarehouseWiseIncrementalOutboundIdGenerator.class);
+        bind(new TypeLiteral<ProductIdGenerator<UniqueProductIdsGenerationRequest>>(){}).annotatedWith(Names.named("productionTimeBasedUniqueProductIdGenerator")).to(ProductionTimeBasedUniqueProductIdGenerator.class);
     }
 
     public static void main(String[] args) {
