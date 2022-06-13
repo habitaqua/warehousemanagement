@@ -18,6 +18,10 @@ public class WarehouseActionValidatorChain {
     List<WarehouseActionEntitiesValidator> startInboundValidators;
     List<WarehouseActionEntitiesValidator> endInboundValidators;
 
+    List<WarehouseActionEntitiesValidator> startOutboundValidators;
+    List<WarehouseActionEntitiesValidator> endOutboundValidators;
+
+
     List<WarehouseActionEntitiesValidator> skuBarcodesGenerationValidators;
 
     @Builder
@@ -25,18 +29,24 @@ public class WarehouseActionValidatorChain {
                                           List<WarehouseActionEntitiesValidator> inventoryOutboundValidators,
                                           List<WarehouseActionEntitiesValidator> startInboundValidators,
                                           List<WarehouseActionEntitiesValidator> endInboundValidators,
+                                          List<WarehouseActionEntitiesValidator> startOutboundValidators,
+                                          List<WarehouseActionEntitiesValidator> endOutboundValidators,
                                           List<WarehouseActionEntitiesValidator> skuBarcodesGenerationValidators) {
 
         Preconditions.checkArgument(inventoryInboundValidators != null, "inventoryInboundValidators not initialised");
         Preconditions.checkArgument(inventoryOutboundValidators != null, "inventoryOutboundValidators not initialised");
         Preconditions.checkArgument(startInboundValidators != null, "startInboundValidators not initialised");
         Preconditions.checkArgument(endInboundValidators != null, "endInboundValidators not initialised");
+        Preconditions.checkArgument(startOutboundValidators != null, "startInboundValidators not initialised");
+        Preconditions.checkArgument(endOutboundValidators != null, "endInboundValidators not initialised");
         Preconditions.checkArgument(skuBarcodesGenerationValidators != null, "skuBarcodesGenerationValidators not initialised");
 
         this.inventoryInboundValidators = inventoryInboundValidators;
         this.inventoryOutboundValidators = inventoryOutboundValidators;
         this.startInboundValidators = startInboundValidators;
         this.endInboundValidators = endInboundValidators;
+        this.startOutboundValidators = startOutboundValidators;
+        this.endOutboundValidators = endOutboundValidators;
         this.skuBarcodesGenerationValidators = skuBarcodesGenerationValidators;
     }
 
@@ -50,6 +60,12 @@ public class WarehouseActionValidatorChain {
                 break;
             case END_INBOUND:
                 validators = endInboundValidators;
+                break;
+            case START_OUTBOUND:
+                validators = startOutboundValidators;
+                break;
+            case END_OUTBOUND:
+                validators = startOutboundValidators;
                 break;
             case INVENTORY_INBOUND:
                 validators = inventoryInboundValidators;

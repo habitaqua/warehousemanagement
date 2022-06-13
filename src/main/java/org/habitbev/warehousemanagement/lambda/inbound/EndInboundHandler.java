@@ -50,7 +50,7 @@ public class EndInboundHandler implements RequestHandler<Map<String, Object>, AP
         } catch (Exception e) {
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
-                    .withBody(e.getCause().getMessage())
+                    .withBody(e.getMessage())
                     .withStatusCode(500)
                     .withIsBase64Encoded(false);
         }

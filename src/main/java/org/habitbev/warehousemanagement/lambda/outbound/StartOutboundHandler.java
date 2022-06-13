@@ -8,12 +8,11 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import lombok.extern.slf4j.Slf4j;
-import org.habitbev.warehousemanagement.entities.inbound.StartInboundRequest;
 import org.habitbev.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.habitbev.warehousemanagement.guice.MainModule;
-import org.habitbev.warehousemanagement.service.InboundService;
 import org.habitbev.warehousemanagement.service.OutboundService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -24,11 +23,8 @@ public class StartOutboundHandler implements RequestHandler<Map<String, Object>,
 
     public StartOutboundHandler() {
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.outboundService = injector.getInstance(OutboundService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
     }
 
     @Override
@@ -37,10 +33,12 @@ public class StartOutboundHandler implements RequestHandler<Map<String, Object>,
             Preconditions.checkArgument(input != null , "StartOutboundHandler.input cannot be null");
             StartOutboundRequest startOutboundRequest = objectMapper.readValue(String.valueOf(input.get("body")),
                     StartOutboundRequest.class);
-            String locationId = outboundService.startOutbound(startOutboundRequest);
+            String outboundId = outboundService.startOutbound(startOutboundRequest);
+            Map<String, String> response = new HashMap<>();
+            response.put("outboundId", outboundId);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody(locationId)
+                    .withBody(objectMapper.writeValueAsString(response))
                     .withIsBase64Encoded(false);
         } catch (IllegalArgumentException e) {
             log.error("invalid input for start inbound request", e);

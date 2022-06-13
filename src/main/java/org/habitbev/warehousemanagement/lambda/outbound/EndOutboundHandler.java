@@ -12,6 +12,7 @@ import org.habitbev.warehousemanagement.entities.outbound.EndOutboundRequest;
 import org.habitbev.warehousemanagement.guice.MainModule;
 import org.habitbev.warehousemanagement.service.OutboundService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
@@ -23,11 +24,8 @@ public class EndOutboundHandler implements RequestHandler<Map<String, Object>, A
 
     public EndOutboundHandler() {
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.outboundService = injector.getInstance(OutboundService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
     }
 
     @Override
@@ -37,9 +35,11 @@ public class EndOutboundHandler implements RequestHandler<Map<String, Object>, A
             EndOutboundRequest endOutboundRequest = objectMapper.readValue(String.valueOf(input.get("body")),
                     EndOutboundRequest.class);
             outboundService.endOutbound(endOutboundRequest);
+            Map<String, String> response = new HashMap<>();
+            response.put("outboundId", endOutboundRequest.getOutboundId());
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(200)
-                    .withBody("success")
+                    .withBody(objectMapper.writeValueAsString(response))
                     .withIsBase64Encoded(false);
         } catch (IllegalArgumentException e) {
             log.error("invalid input for end outbound request", e);
@@ -49,6 +49,7 @@ public class EndOutboundHandler implements RequestHandler<Map<String, Object>, A
         } catch (Exception e) {
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
+                    .withBody(e.getMessage())
                     .withStatusCode(500)
                     .withIsBase64Encoded(false);
         }

@@ -65,6 +65,8 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             expected.put("outboundId", new ExpectedAttributeValue().withExists(false));
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             outboundDynamoDbMapper.save(finishedGoodsOutbound, dynamoDBSaveExpression);
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occurred while starting inbound", e);
             throw new RetriableException(e);
@@ -97,6 +99,8 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             outboundDynamoDbMapper.save(outboundDTO.toDbEntity(), dynamoDBSaveExpression);
 
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (InternalServerErrorException ie) {
             log.error("Retriable Error occured while updating inbound", ie);
             throw new RetriableException(ie);
@@ -124,6 +128,8 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             } else {
                 return Optional.empty();
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while getting last inbound", e);
             throw new RetriableException(e);

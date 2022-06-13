@@ -96,9 +96,9 @@ public class TestOutboundDynamoDAOImpl {
 
     @Test
     public void test_add_input_null_non_retriable_exception() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO cannot be null");
+                .withMessageContaining("outboundDTO cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -110,9 +110,9 @@ public class TestOutboundDynamoDAOImpl {
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.status cannot be null");
+                .withMessageContaining("outboundDTO.status cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -125,9 +125,9 @@ public class TestOutboundDynamoDAOImpl {
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .modifiedTime(startTime).userId(USER_ID).customerId(CUSTOMER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.startTime cannot be null");
+                .withMessageContaining("outboundDTO.startTime cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -140,9 +140,8 @@ public class TestOutboundDynamoDAOImpl {
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).customerId(CUSTOMER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.userId cannot be blank or null");
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO)).withMessageContaining("outboundDTO.userId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -155,9 +154,9 @@ public class TestOutboundDynamoDAOImpl {
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(OUTBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
 
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> outboundDynamoDAO.add(outboundDTO))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("outboundDTO.customerId cannot be blank or null");
+                .withMessageContaining("outboundDTO.customerId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
 
@@ -181,9 +180,8 @@ public class TestOutboundDynamoDAOImpl {
 
     @Test
     public void test_update_input_null() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> outboundDynamoDAO.update(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> outboundDynamoDAO.update(null));
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
     }
@@ -249,9 +247,8 @@ public class TestOutboundDynamoDAOImpl {
 
     @Test
     public void test_get_last_outbound_input_null() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> outboundDynamoDAO.getLastOutbound(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> outboundDynamoDAO.getLastOutbound(null));
         Mockito.verifyZeroInteractions(dynamoDBMapper);
     }
 

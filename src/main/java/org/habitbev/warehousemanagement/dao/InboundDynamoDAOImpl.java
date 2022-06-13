@@ -134,6 +134,8 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             } else {
                 return Optional.empty();
             }
+        } catch (IllegalArgumentException e) {
+            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while getting last inbound", e);
             throw new RetriableException(e);

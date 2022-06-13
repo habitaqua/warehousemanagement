@@ -16,6 +16,8 @@ public class WarehouseActionValidatorChainProvider implements Provider<Warehouse
     InboundIdValidator inboundIdValidator;
     OutboundIdValidator outboundIdValidator;
 
+
+
     SKUCodeValidator skuCodeValidator;
 
     @Inject
@@ -35,10 +37,13 @@ public class WarehouseActionValidatorChainProvider implements Provider<Warehouse
         List<WarehouseActionEntitiesValidator> inventoryOutboundValidators = ImmutableList.of(skuCodeValidator,containerForOutboundValidator, outboundIdValidator);
         List<WarehouseActionEntitiesValidator> skuBarcodeGenerationValidators = ImmutableList.of(skuCodeValidator);
         List<WarehouseActionEntitiesValidator> startInboundValidators = ImmutableList.of();
-        List<WarehouseActionEntitiesValidator> endInboundValidators = ImmutableList.of();
+        List<WarehouseActionEntitiesValidator> endInboundValidators = ImmutableList.of(inboundIdValidator);
+        List<WarehouseActionEntitiesValidator> startOutboundValidators = ImmutableList.of();
+        List<WarehouseActionEntitiesValidator> endOutboundValidators = ImmutableList.of(outboundIdValidator);
+
 
         WarehouseActionValidatorChain chain = WarehouseActionValidatorChain.builder().startInboundValidators(startInboundValidators).endInboundValidators(endInboundValidators).inventoryInboundValidators(inventoryInboundValidators)
-                .inventoryOutboundValidators(inventoryOutboundValidators).skuBarcodesGenerationValidators(skuBarcodeGenerationValidators).build();
+                .inventoryOutboundValidators(inventoryOutboundValidators).skuBarcodesGenerationValidators(skuBarcodeGenerationValidators).startOutboundValidators(startOutboundValidators).endOutboundValidators(endOutboundValidators).build();
         return chain;
 
     }

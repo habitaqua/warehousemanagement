@@ -163,9 +163,8 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_update_input_null() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.update(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> inboundDbSAO.update(null)).withMessageContaining("fgInboundDTO cannot be null");
         Mockito.verifyZeroInteractions(dynamoDBMapper);
 
     }
@@ -231,9 +230,8 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_get_last_inbound_input_null() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
-                .isThrownBy(() -> inboundDbSAO.getLastInbound(null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class);
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> inboundDbSAO.getLastInbound(null));
         Mockito.verifyZeroInteractions(dynamoDBMapper);
     }
 

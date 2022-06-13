@@ -51,7 +51,7 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
-                    .withBody(e.getCause().getMessage())
+                    .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         }
     }
