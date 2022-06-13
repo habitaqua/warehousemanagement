@@ -31,15 +31,6 @@ public class OutboundService {
         this.clock = clock;
     }
 
-    public OutboundDTO get(String warehouseId, String outboundId) {
-        Optional<FinishedGoodsOutbound> finishedGoodsOutboundOp = outboundDAO.get(warehouseId, outboundId);
-        if (!finishedGoodsOutboundOp.isPresent()) {
-            String message = String.format("OutboundId %s in warehouseid %s does not exist", outboundId, warehouseId);
-            throw new ResourceNotAvailableException(message);
-        }
-        return OutboundDTO.fromDbEntity(finishedGoodsOutboundOp.get());
-    }
-
     public String startOutbound(StartOutboundRequest startOutboundRequest) {
         Preconditions.checkArgument(startOutboundRequest != null, "startOutboundRequest cannot be null");
         String warehouseId = startOutboundRequest.getWarehouseId();
