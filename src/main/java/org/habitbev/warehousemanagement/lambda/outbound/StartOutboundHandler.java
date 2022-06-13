@@ -44,11 +44,13 @@ public class StartOutboundHandler implements RequestHandler<Map<String, Object>,
             log.error("invalid input for start inbound request", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(400)
+                    .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
             log.error("Exception occurred while adding location", e);
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
+                    .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         }
     }

@@ -15,7 +15,7 @@ import org.habitbev.warehousemanagement.entities.outbound.outboundstatus.Outboun
  * @author moduludu
  */
 @Data
-@DynamoDBTable(tableName = "fg_outbounds")
+@DynamoDBTable(tableName = "fg-outbounds")
 @NoArgsConstructor
 public class FinishedGoodsOutbound {
 
