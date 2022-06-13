@@ -25,7 +25,7 @@ public class OutboundService {
     private Clock clock;
 
     @Inject
-    public OutboundService(@Named("dynamoDbImpl") OutboundDAO outboundDAO, @Named("warehouseWiseIncrementalOutboundIdGenerator") OutboundIdGenerator outboundIdGenerator, Clock clock) {
+    public OutboundService(@Named("dynamoDbImpl") OutboundDAO outboundDAO, @Named("warehouseWiseIncrementalOutboundIdGenerator") OutboundIdGenerator<StartOutboundRequest> outboundIdGenerator, Clock clock) {
         this.outboundDAO = outboundDAO;
         this.outboundIdGenerator = outboundIdGenerator;
         this.clock = clock;

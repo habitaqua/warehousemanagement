@@ -30,7 +30,7 @@ public class InboundService {
 
     @Inject
     public InboundService(@Named("dynamoDbImpl") InboundDAO inboundDAO,
-                          @Named("warehouseWiseIncrementalInboundIdGenerator") InboundIdGenerator inboundIdGenerator, Clock clock,
+                          @Named("warehouseWiseIncrementalInboundIdGenerator") InboundIdGenerator<StartInboundRequest> inboundIdGenerator, Clock clock,
                           WarehouseActionValidatorChain warehouseActionValidatorChain) {
         this.inboundDAO = inboundDAO;
         this.inboundIdGenerator = inboundIdGenerator;
