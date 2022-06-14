@@ -1,9 +1,10 @@
 package org.habitbev.warehousemanagement.entities.outbound.outboundstatus;
 
 import com.google.common.collect.ImmutableSet;
+import lombok.EqualsAndHashCode;
 
 import java.util.Set;
-
+@EqualsAndHashCode
 public class Closed implements OutboundStatus {
 
     @Override
