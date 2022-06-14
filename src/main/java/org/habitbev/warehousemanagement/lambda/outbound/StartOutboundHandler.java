@@ -1,4 +1,4 @@
-package org.habitbev.warehousemanagement.lambda.inbound;
+package org.habitbev.warehousemanagement.lambda.outbound;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;

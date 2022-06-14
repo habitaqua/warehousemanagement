@@ -28,13 +28,12 @@ public class WarehouseIdValidator implements WarehouseActionEntitiesValidator {
         Preconditions.checkArgument(input != null, "input cannot be null");
         Preconditions.checkArgument(gatheredWarehouseEntities != null, "gatherredWarehouseEntities cannot be null");
 
-        String companyId = input.getCompanyId();
         String warehouseId = input.getWarehouseId();
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
 
         Optional<WarehouseDTO> warehouseDTO = warehouseService.getWarehouse(warehouseId);
         if (!warehouseDTO.isPresent()) {
-            String message = String.format("warehouseId %s and companyId %s mapping does not exist", warehouseId, companyId);
+            String message = String.format("warehouseId %s  mapping does not exist", warehouseId);
             throw new ResourceNotAvailableException(message);
         }
         return gatheredWarehouseEntities.warehouseDTO(warehouseDTO.get());
