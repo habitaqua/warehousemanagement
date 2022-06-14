@@ -7,12 +7,13 @@ import org.habitbev.warehousemanagement.entities.customer.CustomerDTO;
 import org.habitbev.warehousemanagement.entities.inbound.FGInboundDTO;
 import org.habitbev.warehousemanagement.entities.outbound.OutboundDTO;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
+import org.habitbev.warehousemanagement.entities.sku.SKUDTO;
 import org.habitbev.warehousemanagement.entities.warehouse.WarehouseDTO;
 
 @Value
 public class WarehouseValidatedEntities {
 
-    SKU sku;
+    SKUDTO skuDTO;
     ContainerDTO containerDTO;
 
     FGInboundDTO fgInboundDTO;
@@ -26,10 +27,10 @@ public class WarehouseValidatedEntities {
     WarehouseDTO warehouseDTO;
 
 
-    private WarehouseValidatedEntities(SKU sku, ContainerDTO containerDTO, FGInboundDTO fgInboundDTO,
+    private WarehouseValidatedEntities(SKUDTO skuDTO, ContainerDTO containerDTO, FGInboundDTO fgInboundDTO,
                                        OutboundDTO outboundDTO, CompanyDTO companyDTO, CustomerDTO customerDTO,
                                        WarehouseDTO warehouseDTO) {
-        this.sku = sku;
+        this.skuDTO = skuDTO;
         this.containerDTO = containerDTO;
         this.fgInboundDTO = fgInboundDTO;
         this.outboundDTO = outboundDTO;
@@ -39,7 +40,7 @@ public class WarehouseValidatedEntities {
     }
 
     public static class Builder {
-        SKU sku;
+        SKUDTO skuDTO;
         ContainerDTO containerDTO;
         FGInboundDTO fgInboundDTO;
         OutboundDTO outboundDTO;
@@ -53,8 +54,8 @@ public class WarehouseValidatedEntities {
             return this;
         }
 
-        public WarehouseValidatedEntities.Builder sku(SKU sku) {
-            this.sku = sku;
+        public WarehouseValidatedEntities.Builder skuDTO(SKUDTO skuDTO) {
+            this.skuDTO = skuDTO;
             return this;
         }
 
@@ -90,7 +91,7 @@ public class WarehouseValidatedEntities {
     }
 
     private WarehouseValidatedEntities(WarehouseValidatedEntities.Builder b) {
-        this.sku = b.sku;
+        this.skuDTO = b.skuDTO;
         this.containerDTO = b.containerDTO;
         this.fgInboundDTO = b.fgInboundDTO;
         this.outboundDTO = b.outboundDTO;

@@ -100,7 +100,7 @@ public class InventoryService {
         List<InventoryInboundRequest> partitionedInventoryInboundRequests = uniqueProductIdsSubList.stream().map(list -> InventoryInboundRequest.builder().uniqueProductIds(list)
                 .inventoryStatus(inboundReq.getInventoryStatus()).containerId(containerId)
                 .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).inboundId(inboundId)
-                .skuCode(warehouseValidatedEntities.getSku().getSkuCode()).build()).collect(Collectors.toList());
+                .skuCode(warehouseValidatedEntities.getSkuDTO().getSkuCode()).build()).collect(Collectors.toList());
         partitionedInventoryInboundRequests.forEach(partitionedInventoryInboundRequest -> inventoryDAO.inbound(partitionedInventoryInboundRequest));
     }
 
@@ -115,7 +115,7 @@ public class InventoryService {
         WarehouseValidatedEntities warehouseValidatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);
         ContainerDTO validatedContainerDTO = warehouseValidatedEntities.getContainerDTO();
         String containerId = validatedContainerDTO.getContainerId();
-        Integer maxCapacity = validatedContainerDTO.getSkuCodeWisePredefinedCapacity().get(warehouseValidatedEntities.getSku().getSkuCode());
+        Integer maxCapacity = validatedContainerDTO.getSkuCodeWisePredefinedCapacity().get(warehouseValidatedEntities.getSkuDTO().getSkuCode());
         String warehouseId = validatedContainerDTO.getWarehouseId();
 
         List<List<String>> uniqueProductIdsSubList = Lists.partition(uniqueProductIdsToOutbound, FULFILL_SUBLIST_SIZE);

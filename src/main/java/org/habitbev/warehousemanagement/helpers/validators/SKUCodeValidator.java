@@ -6,6 +6,7 @@ import com.google.inject.name.Named;
 import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
 import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
+import org.habitbev.warehousemanagement.entities.sku.SKUDTO;
 import org.habitbev.warehousemanagement.service.SKUService;
 
 public class SKUCodeValidator implements WarehouseActionEntitiesValidator {
@@ -23,7 +24,7 @@ public class SKUCodeValidator implements WarehouseActionEntitiesValidator {
         Preconditions.checkArgument(input != null, "WarehouseActionValidationRequest cannot be null");
         String skuCode = input.getSkuCode();
         String companyId = input.getCompanyId();
-        SKU sku = skuService.get(companyId, skuCode);
-        return gatheredWarehouseEntities.sku(sku);
+        SKUDTO skudto = skuService.get(companyId, skuCode);
+        return gatheredWarehouseEntities.skuDTO(skudto);
     }
 }

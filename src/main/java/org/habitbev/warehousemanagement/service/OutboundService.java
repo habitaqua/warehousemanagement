@@ -44,8 +44,9 @@ public class OutboundService {
         String warehouseId = startOutboundRequest.getWarehouseId();
         String userId = startOutboundRequest.getUserId();
         String customerId = startOutboundRequest.getCustomerId();
+        String companyId = startOutboundRequest.getCompanyId();
         WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder()
-                .userId(userId).warehouseId(warehouseId).customerId(customerId).warehouseAction(WarehouseAction.START_OUTBOUND).build();
+                .userId(userId).warehouseId(warehouseId).customerId(customerId).companyId(companyId).warehouseAction(WarehouseAction.START_OUTBOUND).build();
         WarehouseValidatedEntities validatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);
 
         synchronized (warehouseId) {

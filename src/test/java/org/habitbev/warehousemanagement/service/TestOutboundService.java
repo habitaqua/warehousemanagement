@@ -31,6 +31,7 @@ public class TestOutboundService {
     public static final String USER_1 = "user-1";
     public static final String OUTBOUND_1 = "OUTBOUND_1";
     public static final String CUSTOMER_1 = "customer-1";
+    public static final String COMPANY_1 = "company-1";
     OutboundService outboundService;
     @Mock
     OutboundDAO outboundDAO;
@@ -62,7 +63,7 @@ public class TestOutboundService {
     @Test
     public void test_startOutbound_success() {
 
-        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1).build();
+        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().companyId(COMPANY_1).warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1).build();
         Mockito.when(outboundIdGenerator.generate(eq(startOutboundRequest))).thenReturn(OUTBOUND_1);
         String actualOutboundId = outboundService.startOutbound(startOutboundRequest);
         new StringAssert(actualOutboundId).isEqualTo(OUTBOUND_1);
@@ -78,7 +79,7 @@ public class TestOutboundService {
 
     @Test
     public void test_startOutbound_outbound_id_generator_throws_exception() {
-        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1).build();
+        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().companyId(COMPANY_1).warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1).build();
         Mockito.when(outboundIdGenerator.generate(eq(startOutboundRequest))).thenThrow(new RuntimeException());
         Assertions.assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> outboundService.startOutbound(startOutboundRequest));
         Mockito.verify(outboundIdGenerator).generate(eq(startOutboundRequest));
@@ -88,7 +89,8 @@ public class TestOutboundService {
 
     @Test
     public void test_startOutbound_outbound_dao_throws_exception() {
-        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1).build();
+        StartOutboundRequest startOutboundRequest = StartOutboundRequest.builder().warehouseId(WAREHOUSE_1).userId(USER_1).customerId(CUSTOMER_1)
+                .companyId(COMPANY_1).build();
         Mockito.when(outboundIdGenerator.generate(eq(startOutboundRequest))).thenReturn(OUTBOUND_1);
         Mockito.doThrow(new IllegalArgumentException("illegal argument exception")).when(outboundDAO).add(outboundDTOArgumentCaptor.capture());
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> outboundService.startOutbound(startOutboundRequest));

@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.habitbev.warehousemanagement.entities.SKUBarcodesGenerationRequest;
@@ -20,13 +21,9 @@ public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<Stri
 
 
     public SKUBulkBarcodesGenerationHandler() {
-        System.out.println("injection started");
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.SKUBulkBarcodesCreationService = injector.getInstance(SKUBulkBarcodesCreationService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
 
 
     }
@@ -37,7 +34,6 @@ public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<Stri
         try {
             SKUBarcodesGenerationRequest request = objectMapper.readValue(String.valueOf(input.get("body")),
                     SKUBarcodesGenerationRequest.class);
-
 
             String downloadURL = SKUBulkBarcodesCreationService.generate(request);
 

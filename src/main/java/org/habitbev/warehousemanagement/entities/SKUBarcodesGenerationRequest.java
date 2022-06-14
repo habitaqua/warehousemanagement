@@ -14,8 +14,10 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 public class SKUBarcodesGenerationRequest {
 
+    @JsonProperty("companyId")
     String companyId;
 
+    @JsonProperty("warehouseId")
     String warehouseId;
     @JsonProperty("skuCode")
     String skuCode;
@@ -26,10 +28,9 @@ public class SKUBarcodesGenerationRequest {
 
     @Builder
     public SKUBarcodesGenerationRequest(String companyId, String warehouseId, String skuCode, int quantity) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be null");
-        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be null");
-
-        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuType is null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuType is blank");
         Preconditions.checkArgument(quantity > 0 && quantity <= 1000, "quantity should be less than 1000");
 
         this.companyId = companyId;

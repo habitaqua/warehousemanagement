@@ -21,6 +21,7 @@ import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
 import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Production;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
+import org.habitbev.warehousemanagement.entities.sku.SKUDTO;
 import org.habitbev.warehousemanagement.helpers.BarcodesPersistor;
 import org.habitbev.warehousemanagement.helpers.idgenerators.ProductIdGenerator;
 import org.habitbev.warehousemanagement.helpers.validators.WarehouseActionValidatorChain;
@@ -68,11 +69,10 @@ public class SKUBulkBarcodesCreationService {
             WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder().skuCode(request.getSkuCode())
                     .warehouseId(request.getWarehouseId()).companyId(request.getCompanyId()).warehouseAction(SKU_BARCODE_GENERATION).build();
             WarehouseValidatedEntities warehouseValidatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);
-            SKU sku = warehouseValidatedEntities.getSku();
-            String skuCategory = sku.getSkuCategory();
-            String skuType = sku.getSkuType();
-            String companyId = request.getCompanyId();
-            String skuCode = sku.getSkuCode();
+            SKUDTO skuDTO = warehouseValidatedEntities.getSkuDTO();
+            String skuCategory = skuDTO.getSkuCategory();
+            String skuType = skuDTO.getSkuType();
+            String skuCode = skuDTO.getSkuCode();
             long productionTime = clock.millis();
 
             UniqueProductIdsGenerationRequest productIdsRequestDTO = UniqueProductIdsGenerationRequest.builder()
@@ -92,7 +92,7 @@ public class SKUBulkBarcodesCreationService {
             file.getParentFile().mkdirs();
 
             PdfDocument pdfDoc = new PdfDocument(new PdfWriter(filePath));
-            List<BarcodeDataDTO> barcodesContent = createBarcodesDTO(successfulProductIds, sku, pdfDoc);
+            List<BarcodeDataDTO> barcodesContent = createBarcodesDTO(successfulProductIds, skuDTO, pdfDoc);
 
             Document doc = new Document(pdfDoc);
             doc.setTextAlignment(TextAlignment.CENTER);
@@ -110,11 +110,11 @@ public class SKUBulkBarcodesCreationService {
     }
 
 
-    private List<BarcodeDataDTO> createBarcodesDTO(List<String> uniqueIds, SKU sku,
+    private List<BarcodeDataDTO> createBarcodesDTO(List<String> uniqueIds, SKUDTO skudto,
                                                    PdfDocument pdfDoc) {
         List<BarcodeDataDTO> barcodeDataDTOS =
                 uniqueIds.stream().map(id -> BarcodeDataDTO.builder().valueToEncode(id).pdfDocument(pdfDoc)
-                        .altText(sku.getSkuCode()).build()).collect(Collectors.toList());
+                        .altText(skudto.getSkuCode()).build()).collect(Collectors.toList());
 
         return barcodeDataDTOS;
     }
