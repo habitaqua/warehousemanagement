@@ -47,7 +47,7 @@ public class OutboundIdValidator implements WarehouseActionEntitiesValidator {
             }
             return warehouseEntityBuilder.outboundDTO(outboundDTO);
         } catch (IllegalArgumentException | ResourceNotAvailableException | InconsistentStateException e) {
-            throw new WarehouseActionValidationException(e.getCause());
+            throw new WarehouseActionValidationException(e);
         }
 
     }

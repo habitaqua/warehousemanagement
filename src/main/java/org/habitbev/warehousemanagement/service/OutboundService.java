@@ -62,7 +62,7 @@ public class OutboundService {
         Preconditions.checkArgument(endOutboundRequest != null, "endOutboundRequest cannot be null");
         String warehouseId = endOutboundRequest.getWarehouseId();
         WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder()
-                .warehouseId(warehouseId).warehouseAction(WarehouseAction.END_OUTBOUND).build();
+                .warehouseId(warehouseId).outboundId(endOutboundRequest.getOutboundId()).warehouseAction(WarehouseAction.END_OUTBOUND).build();
         WarehouseValidatedEntities validatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);
         OutboundDTO outboundDTO = OutboundDTO.builder().outboundId(endOutboundRequest.getOutboundId())
                 .warehouseId(endOutboundRequest.getWarehouseId()).status(new Closed()).endTime(clock.millis()).build();
