@@ -1,18 +1,13 @@
 package org.habitbev.warehousemanagement.service;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.dao.SKUDAO;
 import org.habitbev.warehousemanagement.entities.exceptions.ResourceNotAvailableException;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class SKUService{
 

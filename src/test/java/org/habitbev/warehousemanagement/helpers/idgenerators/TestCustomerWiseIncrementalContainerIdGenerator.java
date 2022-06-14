@@ -19,7 +19,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestWarehouseWiseIncrementalContainerIdGenerator {
+public class TestCustomerWiseIncrementalContainerIdGenerator {
 
     public static final String WAREHOUSE_1 = "warehouse-1";
     public static final ImmutableMap<String, Integer> SKU_CODE_WISE_PREDEFINED_CAPACITY = ImmutableMap.of("sku-code", 10);

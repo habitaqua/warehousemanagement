@@ -41,7 +41,6 @@ public class MainModule extends AbstractModule {
         bind(BarcodesPersistor.class).annotatedWith(Names.named("s3BarcodesPersistor")).to(S3BarcodesPersistor.class);
         bindIdGenerators();
         bindDAO();
-        bind(SKUService.class).annotatedWith(Names.named("configSKUService")).to(SKUService.class);
         bind(WarehouseActionValidatorChain.class).toProvider(WarehouseActionValidatorChainProvider.class);
     }
 
@@ -52,18 +51,26 @@ public class MainModule extends AbstractModule {
         bind(OutboundDAO.class).annotatedWith(Names.named("dynamoDbImpl")).to(OutboundDynamoDAOImpl.class);
         bind(InventoryDAO.class).annotatedWith(Names.named("dynamoDbImpl")).to(InventoryDynamoDAOImpl.class);
         bind(SKUDAO.class).annotatedWith(Names.named("configSKUDAOImpl")).to(ConfigSKUDAOImpl.class);
+        bind(CompanyDAO.class).annotatedWith(Names.named("configCompanyDAOImpl")).to(ConfigCompanyDAOImpl.class);
+        bind(CustomerDAO.class).annotatedWith(Names.named("configCustomerDAOImpl")).to(ConfigCustomerDAOImpl.class);
+        bind(WarehouseDAO.class).annotatedWith(Names.named("configWarehouseDAOImpl")).to(ConfigWarehouseDAOImpl.class);
     }
 
     private void bindIdGenerators() {
-        bind(new TypeLiteral<ContainerIdGenerator<AddContainerRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalContainerIdGenerator")).to(WarehouseWiseIncrementalContainerIdGenerator.class);
-        bind(new TypeLiteral<InboundIdGenerator<StartInboundRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalInboundIdGenerator")).to(WarehouseWiseIncrementalInboundIdGenerator.class);
-        bind(new TypeLiteral<OutboundIdGenerator<StartOutboundRequest>>(){}).annotatedWith(Names.named("warehouseWiseIncrementalOutboundIdGenerator")).to(WarehouseWiseIncrementalOutboundIdGenerator.class);
-        bind(new TypeLiteral<ProductIdGenerator<UniqueProductIdsGenerationRequest>>(){}).annotatedWith(Names.named("productionTimeBasedUniqueProductIdGenerator")).to(ProductionTimeBasedUniqueProductIdGenerator.class);
+        bind(new TypeLiteral<ContainerIdGenerator<AddContainerRequest>>() {
+        }).annotatedWith(Names.named("warehouseWiseIncrementalContainerIdGenerator")).to(WarehouseWiseIncrementalContainerIdGenerator.class);
+        bind(new TypeLiteral<InboundIdGenerator<StartInboundRequest>>() {
+        }).annotatedWith(Names.named("warehouseWiseIncrementalInboundIdGenerator")).to(WarehouseWiseIncrementalInboundIdGenerator.class);
+        bind(new TypeLiteral<OutboundIdGenerator<StartOutboundRequest>>() {
+        }).annotatedWith(Names.named("warehouseWiseIncrementalOutboundIdGenerator")).to(WarehouseWiseIncrementalOutboundIdGenerator.class);
+        bind(new TypeLiteral<ProductIdGenerator<UniqueProductIdsGenerationRequest>>() {
+        }).annotatedWith(Names.named("productionTimeBasedUniqueProductIdGenerator")).to(ProductionTimeBasedUniqueProductIdGenerator.class);
     }
 
     public static void main(String[] args) {
         new MainModule().configure();
     }
+
     private void bindProperties() {
         String domain = "beta";
         Properties properties = new Properties();

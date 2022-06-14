@@ -15,32 +15,35 @@ public class WarehouseActionValidatorChainProvider implements Provider<Warehouse
     ContainerForOutboundValidator containerForOutboundValidator;
     InboundIdValidator inboundIdValidator;
     OutboundIdValidator outboundIdValidator;
-
-
-
+    CompanyIdValidator companyIdValidator;
+    CustomerIdValidator customerIdValidator;
+    WarehouseIdValidator warehouseIdValidator;
     SKUCodeValidator skuCodeValidator;
 
     @Inject
     public WarehouseActionValidatorChainProvider(ContainerForInboundValidator containerForInboundValidator, ContainerForOutboundValidator containerForOutboundValidator,
-                                                 InboundIdValidator inboundIdValidator, OutboundIdValidator outboundIdValidator, SKUCodeValidator skuCodeValidator) {
+                                                 InboundIdValidator inboundIdValidator, OutboundIdValidator outboundIdValidator, SKUCodeValidator skuCodeValidator,
+                                                 CompanyIdValidator companyIdValidator, CustomerIdValidator customerIdValidator, WarehouseIdValidator warehouseIdValidator) {
         this.containerForInboundValidator = containerForInboundValidator;
         this.containerForOutboundValidator = containerForOutboundValidator;
         this.inboundIdValidator = inboundIdValidator;
         this.outboundIdValidator = outboundIdValidator;
         this.skuCodeValidator = skuCodeValidator;
+        this.customerIdValidator = customerIdValidator;
+        this.warehouseIdValidator = warehouseIdValidator;
+        this.companyIdValidator = companyIdValidator;
     }
 
     @Override
     public WarehouseActionValidatorChain get() {
-        List<WarehouseActionEntitiesValidator> inventoryInboundValidators = ImmutableList.of(skuCodeValidator,containerForInboundValidator, inboundIdValidator);
+        List<WarehouseActionEntitiesValidator> inventoryInboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator, containerForInboundValidator, inboundIdValidator);
 
-        List<WarehouseActionEntitiesValidator> inventoryOutboundValidators = ImmutableList.of(skuCodeValidator,containerForOutboundValidator, outboundIdValidator);
-        List<WarehouseActionEntitiesValidator> skuBarcodeGenerationValidators = ImmutableList.of(skuCodeValidator);
-        List<WarehouseActionEntitiesValidator> startInboundValidators = ImmutableList.of();
+        List<WarehouseActionEntitiesValidator> inventoryOutboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator, containerForOutboundValidator, outboundIdValidator);
+        List<WarehouseActionEntitiesValidator> skuBarcodeGenerationValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator);
+        List<WarehouseActionEntitiesValidator> startInboundValidators = ImmutableList.of(warehouseIdValidator);
         List<WarehouseActionEntitiesValidator> endInboundValidators = ImmutableList.of(inboundIdValidator);
-        List<WarehouseActionEntitiesValidator> startOutboundValidators = ImmutableList.of();
+        List<WarehouseActionEntitiesValidator> startOutboundValidators = ImmutableList.of(warehouseIdValidator, customerIdValidator);
         List<WarehouseActionEntitiesValidator> endOutboundValidators = ImmutableList.of(outboundIdValidator);
-
 
         WarehouseActionValidatorChain chain = WarehouseActionValidatorChain.builder()
                 .startInboundValidators(startInboundValidators)
