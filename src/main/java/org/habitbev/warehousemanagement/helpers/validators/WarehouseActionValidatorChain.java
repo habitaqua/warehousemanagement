@@ -65,7 +65,7 @@ public class WarehouseActionValidatorChain {
                 validators = startOutboundValidators;
                 break;
             case END_OUTBOUND:
-                validators = startOutboundValidators;
+                validators = endOutboundValidators;
                 break;
             case INVENTORY_INBOUND:
                 validators = inventoryInboundValidators;
