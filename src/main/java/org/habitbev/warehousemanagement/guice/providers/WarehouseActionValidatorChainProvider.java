@@ -42,8 +42,14 @@ public class WarehouseActionValidatorChainProvider implements Provider<Warehouse
         List<WarehouseActionEntitiesValidator> endOutboundValidators = ImmutableList.of(outboundIdValidator);
 
 
-        WarehouseActionValidatorChain chain = WarehouseActionValidatorChain.builder().startInboundValidators(startInboundValidators).endInboundValidators(endInboundValidators).inventoryInboundValidators(inventoryInboundValidators)
-                .inventoryOutboundValidators(inventoryOutboundValidators).skuBarcodesGenerationValidators(skuBarcodeGenerationValidators).startOutboundValidators(startOutboundValidators).endOutboundValidators(endOutboundValidators).build();
+        WarehouseActionValidatorChain chain = WarehouseActionValidatorChain.builder()
+                .startInboundValidators(startInboundValidators)
+                .endInboundValidators(endInboundValidators)
+                .inventoryInboundValidators(inventoryInboundValidators)
+                .inventoryOutboundValidators(inventoryOutboundValidators)
+                .skuBarcodesGenerationValidators(skuBarcodeGenerationValidators)
+                .startOutboundValidators(startOutboundValidators)
+                .endOutboundValidators(endOutboundValidators).build();
         return chain;
 
     }

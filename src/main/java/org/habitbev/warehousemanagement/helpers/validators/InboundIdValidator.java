@@ -46,7 +46,7 @@ public class InboundIdValidator implements WarehouseActionEntitiesValidator {
             }
             return warehouseEntityBuilder.fgInboundDTO(FGInboundDTO.fromDbEntity(finishedGoodsInbound));
         } catch (IllegalArgumentException |ResourceNotAvailableException |InconsistentStateException e) {
-            throw new WarehouseActionValidationException(e.getCause());
+            throw new WarehouseActionValidationException(e);
         }
 
     }

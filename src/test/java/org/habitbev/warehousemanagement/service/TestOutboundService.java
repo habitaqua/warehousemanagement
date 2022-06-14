@@ -10,6 +10,7 @@ import org.habitbev.warehousemanagement.entities.outbound.StartOutboundRequest;
 import org.habitbev.warehousemanagement.entities.outbound.outboundstatus.Active;
 import org.habitbev.warehousemanagement.entities.outbound.outboundstatus.Closed;
 import org.habitbev.warehousemanagement.helpers.idgenerators.OutboundIdGenerator;
+import org.habitbev.warehousemanagement.helpers.validators.WarehouseActionValidatorChain;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,10 +41,13 @@ public class TestOutboundService {
     @Captor
     ArgumentCaptor<OutboundDTO> outboundDTOArgumentCaptor;
 
+    @Mock
+    WarehouseActionValidatorChain warehouseActionValidatorChain;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        outboundService = new OutboundService(outboundDAO, outboundIdGenerator, clock);
+        outboundService = new OutboundService(outboundDAO, outboundIdGenerator, clock, warehouseActionValidatorChain);
         Mockito.when(clock.millis()).thenReturn(EPOCH_MILLI);
     }
 

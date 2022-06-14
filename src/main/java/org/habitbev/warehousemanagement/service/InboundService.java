@@ -39,15 +39,6 @@ public class InboundService {
     }
 
 
-    public FGInboundDTO getInbound(String warehouseId, String inboundId) {
-        Optional<FinishedGoodsInbound> finishedGoodsInboundOp = inboundDAO.get(warehouseId, inboundId);
-        if (!finishedGoodsInboundOp.isPresent()) {
-            String message = String.format("InboundId %s in warehouseid %s does not exist", inboundId, warehouseId);
-            throw new ResourceNotAvailableException(message);
-        }
-        return FGInboundDTO.fromDbEntity(finishedGoodsInboundOp.get());
-    }
-
     public String startInbound(StartInboundRequest startInboundRequest) {
         Preconditions.checkArgument(startInboundRequest != null, "startInboundRequest cannot be null");
         String warehouseId = startInboundRequest.getWarehouseId();
