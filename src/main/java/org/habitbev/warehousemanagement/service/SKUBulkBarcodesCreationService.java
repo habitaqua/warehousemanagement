@@ -43,7 +43,6 @@ public class SKUBulkBarcodesCreationService {
 
     WarehouseActionValidatorChain warehouseActionValidatorChain;
     InventoryService inventoryService;
-    ExecutorService executorService;
     Clock clock;
     BarcodesPersistor barcodesPersistor;
     ProductIdGenerator<UniqueProductIdsGenerationRequest> productIdGenerator;
@@ -53,13 +52,13 @@ public class SKUBulkBarcodesCreationService {
     @Inject
     public SKUBulkBarcodesCreationService(Clock clock, @Named("s3BarcodesPersistor") BarcodesPersistor barcodesPersistor,
                                           @Named("productionTimeBasedUniqueProductIdGenerator") ProductIdGenerator<UniqueProductIdsGenerationRequest> productIdGenerator,
-                                          InventoryService inventoryService, WarehouseActionValidatorChain warehouseActionValidatorChain, String filePath, ExecutorService executorService) {
+                                          InventoryService inventoryService, WarehouseActionValidatorChain warehouseActionValidatorChain, @Named("barcodesLocalFilePath") String filePath) {
         this.clock = clock;
         this.barcodesPersistor = barcodesPersistor;
         this.productIdGenerator = productIdGenerator;
         this.inventoryService = inventoryService;
         this.filePath = filePath;
-        this.executorService = executorService;
+
         this.warehouseActionValidatorChain = warehouseActionValidatorChain;
     }
 
