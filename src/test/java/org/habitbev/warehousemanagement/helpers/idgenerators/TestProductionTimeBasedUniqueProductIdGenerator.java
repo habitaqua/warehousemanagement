@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestProductionTimeBasedUniqueProductIdGenerator {
-    private static final String DELIMITER = "<%>";
+    private static final String DELIMITER = "-";
     private static final char PAD_CHAR = '0';
     private static final int PAD_SIZE = 4;
     public static final String COMPANY_1 = "company-1";

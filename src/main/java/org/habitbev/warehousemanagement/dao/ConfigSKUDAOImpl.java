@@ -21,7 +21,6 @@ public class ConfigSKUDAOImpl implements SKUDAO {
             ImmutableMap.of("VIVALA-BEVERAGES",
                     ImmutableMap.of(BAILLEY_500_ML_WATER, SKU.builder().skuCategory(FINISHED_GOODS).skuType(WATER).skuCode(BAILLEY_500_ML_WATER).build()));
 
-
     @Override
     public List<SKUDTO> getAll(String companyId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
