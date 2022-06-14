@@ -127,5 +127,9 @@ public class SKUBulkBarcodesCreationService {
         Paragraph paragraph = new Paragraph().add(new Image(barcodeObject));
         return paragraph;
     }
+
+    public static void main(String[] args) {
+
+    }
 }
 

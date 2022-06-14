@@ -16,10 +16,11 @@ public class ConfigSKUDAOImpl implements SKUDAO {
 
     private static final String FINISHED_GOODS = "FINISHED-GOODS";
     private static final String WATER = "WATER";
-    private static final String BAILLEY_500_ML_WATER = "BAILLEY-500ML-WATER";
+    private static final String BAILLEY_500_ML_WATER = "BL500MLW";
     Map<String, Map<String, SKU>> companyIdToSKUMapping =
             ImmutableMap.of("VIVALA-BEVERAGES",
                     ImmutableMap.of(BAILLEY_500_ML_WATER, SKU.builder().skuCategory(FINISHED_GOODS).skuType(WATER).skuCode(BAILLEY_500_ML_WATER).build()));
+
 
     @Override
     public List<SKUDTO> getAll(String companyId) {

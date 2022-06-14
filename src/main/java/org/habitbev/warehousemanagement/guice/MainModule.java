@@ -37,7 +37,7 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindProperties();
         bind(ExecutorService.class).annotatedWith(Names.named("addInventoryExecutorService"))
-                .toInstance(Executors.newFixedThreadPool(25));
+                .toInstance(Executors.newFixedThreadPool(50));
         bind(BarcodesPersistor.class).annotatedWith(Names.named("s3BarcodesPersistor")).to(S3BarcodesPersistor.class);
         bindIdGenerators();
         bindDAO();
