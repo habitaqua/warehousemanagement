@@ -65,17 +65,18 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         try {
             Preconditions.checkArgument(addRequest != null, "inventoryAddRequest cannot be null");
             List<String> uniqueProductIds = addRequest.getUniqueProductIds();
-            List<KeyPair> keyPairsToLoad = uniqueProductIds.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+            String companyId = addRequest.getCompanyId();
+            List<KeyPair> keyPairsToLoad = uniqueProductIds.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(companyId)).collect(Collectors.toList());
             Map<String, List<Object>> inventoryObjects = inventoryDynamoDbMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
             if (!inventoryObjects.get(INVENTORY_TABLE_NAME).isEmpty()) {
                 String message = String.format("Some or All of given ids %s already exist for companyId %s and warehouse Id %s", StringUtils.join(uniqueProductIds, COMMA),
-                        addRequest.getCompanyId(), addRequest.getWarehouseId());
+                        companyId, addRequest.getWarehouseId());
                 throw new ResourceAlreadyExistsException(message);
             }
             long creationTime = clock.millis();
             String skuCategoryAndType = String.join(DELIMITER, addRequest.getSkuCategory(), addRequest.getSkuType());
             List<Inventory> newInventories = uniqueProductIds.stream().map(productId -> Inventory.builder().uniqueProductId(productId)
-                    .companyId(addRequest.getCompanyId()).warehouseId(addRequest.getWarehouseId())
+                    .companyId(companyId).warehouseId(addRequest.getWarehouseId())
                     .inventoryStatus(new Production()).creationTime(creationTime).modifiedTime(creationTime)
                     .productionTime(addRequest.getProductionTime()).skuCode(addRequest.getSkuCode())
                     .skuCategoryType(skuCategoryAndType).build()).collect(toList());
@@ -270,6 +271,8 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequest.getCompanyId()));
+
         InventoryStatus newInventoryStatus = inventoryInboundRequest.getInventoryStatus();
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
         long currentTime = clock.millis();
@@ -277,7 +280,6 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequest.getInboundId()));
         updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequest.getContainerId()));
         updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequest.getWarehouseId()));
-        updatedAttributes.put(":company_id", new AttributeValue(inventoryInboundRequest.getCompanyId()));
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));
 
         String previousStatus = getAppendedStatusString(newInventoryStatus, updatedAttributes);
@@ -287,7 +289,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
                 .withExpressionAttributeValues(updatedAttributes)
                 .withUpdateExpression("SET inventoryStatus = :new_status , inboundId = :inbound_id , containerId =:container_id , " +
                         "modifiedTime= :modified_time")
-                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND companyId = :company_id AND warehouseId = :warehouse_id");
+                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND warehouseId = :warehouse_id");
         return update;
     }
 
@@ -296,6 +298,8 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequest.getCompanyId()));
+
         InventoryStatus newInventoryStatus = inventoryOutboundRequest.getInventoryStatus();
 
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
@@ -304,7 +308,6 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequest.getOutboundId()));
         updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequest.getOrderId()));
         updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequest.getContainerId()));
-        updatedAttributes.put(":company_id", new AttributeValue(inventoryOutboundRequest.getCompanyId()));
         updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequest.getWarehouseId()));
 
         long currentTime = clock.millis();
@@ -316,7 +319,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
                 .withUpdateExpression("SET inventoryStatus = :new_status , orderId = :order_id , outboundId =:outbound_id , " +
                         "modifiedTime= :modified_time")
                 .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND containerId = :container_id " +
-                        "AND companyId = :company_id AND warehouseId = :warehouse_id");
+                        "AND warehouseId = :warehouse_id");
         return update;
     }
 
@@ -324,6 +327,8 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
+        inventoryKey.put("companyId", new AttributeValue().withS(moveInventoryRequest.getCompanyId()));
+
         String destinationContainerId = moveInventoryRequest.getDestinationContainerId();
         String sourceContainerId = moveInventoryRequest.getSourceContainerId();
 
@@ -333,7 +338,6 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         long currentTime = clock.millis();
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));
         updatedAttributes.put(":existing_container_id", new AttributeValue(sourceContainerId));
-        updatedAttributes.put(":company_id", new AttributeValue(moveInventoryRequest.getCompanyId()));
         updatedAttributes.put(":warehouse_id", new AttributeValue(moveInventoryRequest.getWarehouseId()));
 
 
@@ -341,7 +345,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         Update update = new Update().withTableName(INVENTORY_TABLE_NAME).withKey(inventoryKey)
                 .withExpressionAttributeValues(updatedAttributes)
                 .withUpdateExpression("SET containerId = :new_container_id , modifiedTime= :modified_time")
-                .withConditionExpression("containerId = :existing_container_id AND companyId = :company_id AND warehouseId = :warehouse_id");
+                .withConditionExpression("containerId = :existing_container_id AND warehouseId = :warehouse_id");
         return update;
     }
 

@@ -50,8 +50,7 @@ public class TestProductionTimeBasedUniqueProductIdGenerator {
         List<String> generatedIds = new ArrayList<>();
         for (int i = 1; i <= quantity; i++) {
             String incremental_number = StringUtils.leftPad(String.valueOf(i), PAD_SIZE, PAD_CHAR);
-            String id = String.join(DELIMITER, input.getCompanyId(), input.getWarehouseId(), input.getSkuCategory(),
-                    input.getSkuType(), String.valueOf(input.getProductionTime()), incremental_number);
+            String id = String.join(DELIMITER, input.getSkuCode(), String.valueOf(input.getProductionTime()), incremental_number);
             generatedIds.add(id);
         }
         return generatedIds;

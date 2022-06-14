@@ -428,7 +428,7 @@ public class TestInventoryDynamoDAOImpl {
 
     private void assertInventoryBatchLoadArguments(InventoryAddRequest addRequest) {
         ImmutableMap<Class<?>, List<KeyPair>> actualBatchLoadArgument = batchLoadArgumentCaptor.getValue();
-        List<KeyPair> keyPairsToLoad = addRequest.getUniqueProductIds().stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = addRequest.getUniqueProductIds().stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
         ImmutableMap<Class<?>, List<KeyPair>> expectedBatchLoadArgument = ImmutableMap.of(Inventory.class, keyPairsToLoad);
         new IntegerAssert(actualBatchLoadArgument.keySet().size()).isEqualTo(expectedBatchLoadArgument.keySet().size());
         new IntegerAssert(actualBatchLoadArgument.values().size()).isEqualTo(expectedBatchLoadArgument.values().size());
@@ -498,6 +498,8 @@ public class TestInventoryDynamoDAOImpl {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequest.getCompanyId()));
+
         InventoryStatus newInventoryStatus = inventoryOutboundRequest.getInventoryStatus();
 
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
@@ -506,7 +508,6 @@ public class TestInventoryDynamoDAOImpl {
         updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequest.getOutboundId()));
         updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequest.getOrderId()));
         updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequest.getContainerId()));
-        updatedAttributes.put(":company_id", new AttributeValue(inventoryOutboundRequest.getCompanyId()));
         updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequest.getWarehouseId()));
 
         long currentTime = EPOCH_MILLI;
@@ -517,8 +518,8 @@ public class TestInventoryDynamoDAOImpl {
                 .withExpressionAttributeValues(updatedAttributes)
                 .withUpdateExpression("SET inventoryStatus = :new_status , orderId = :order_id , outboundId =:outbound_id , " +
                         "modifiedTime= :modified_time")
-                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND containerId = :container_id " +
-                        "AND companyId = :company_id AND warehouseId = :warehouse_id");
+                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND containerId = :container_id" +
+                        " AND warehouseId = :warehouse_id");
         return update;
     }
 
@@ -553,13 +554,14 @@ public class TestInventoryDynamoDAOImpl {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequest.getCompanyId()));
+
         InventoryStatus newInventoryStatus = inventoryInboundRequest.getInventoryStatus();
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
         updatedAttributes.put(":new_status", new AttributeValue(newInventoryStatus.getStatus()));
         updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequest.getInboundId()));
         updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequest.getContainerId()));
         updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequest.getWarehouseId()));
-        updatedAttributes.put(":company_id", new AttributeValue(inventoryInboundRequest.getCompanyId()));
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(EPOCH_MILLI)));
 
         String previousStatus = getAppendedStatusString(newInventoryStatus, updatedAttributes);
@@ -569,7 +571,7 @@ public class TestInventoryDynamoDAOImpl {
                 .withExpressionAttributeValues(updatedAttributes)
                 .withUpdateExpression("SET inventoryStatus = :new_status , inboundId = :inbound_id , containerId =:container_id , " +
                         "modifiedTime= :modified_time")
-                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND companyId = :company_id AND warehouseId = :warehouse_id");
+                .withConditionExpression("inventoryStatus IN (" + previousStatus + ") AND warehouseId = :warehouse_id");
         return update;
     }
 

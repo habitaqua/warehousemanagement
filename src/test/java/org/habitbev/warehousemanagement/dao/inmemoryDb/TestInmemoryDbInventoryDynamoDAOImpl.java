@@ -129,7 +129,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).productionTime(productionTime).build();
 
         inventoryDynamoDAO.add(request);
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(request.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
@@ -157,11 +157,11 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
     @Test
     public void test_inbound_success() {
         long productionTime = clock.millis();
-        InventoryAddRequest request = InventoryAddRequest.builder().warehouseId(WAREHOUSE_1).companyId(COMPANY_1)
+        InventoryAddRequest addRequest = InventoryAddRequest.builder().warehouseId(WAREHOUSE_1).companyId(COMPANY_1)
                 .inventoryStatus(new Production()).skuType(SKU_TYPE).skuCode(SKU_CODE).skuCategory(SKU_CATEGORY)
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).productionTime(productionTime).build();
 
-        inventoryDynamoDAO.add(request);
+        inventoryDynamoDAO.add(addRequest);
 
         InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
@@ -169,16 +169,16 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
 
 
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
         List<Inventory> actualInventory = objects.stream().map(object -> (Inventory) object).collect(Collectors.toList());
-        String skuCategoryAndType = String.join(DELIMITER, request.getSkuCategory(), request.getSkuType());
+        String skuCategoryAndType = String.join(DELIMITER, addRequest.getSkuCategory(), addRequest.getSkuType());
         List<Inventory> expectedInventory = UNIQUE_PRODUCT_IDS_1.stream().map(id -> Inventory.builder().uniqueProductId(id)
-                .warehouseId(request.getWarehouseId()).companyId(request.getCompanyId()).containerId(inventoryInboundRequest.getContainerId())
-                .inboundId(inventoryInboundRequest.getInboundId()).skuCategoryType(skuCategoryAndType).skuCode(request.getSkuCode()).creationTime(clock.millis()).modifiedTime(clock.millis())
-                .productionTime(request.getProductionTime()).inventoryStatus(inventoryInboundRequest.getInventoryStatus()).build()).collect(Collectors.toList());
+                .warehouseId(addRequest.getWarehouseId()).companyId(addRequest.getCompanyId()).containerId(inventoryInboundRequest.getContainerId())
+                .inboundId(inventoryInboundRequest.getInboundId()).skuCategoryType(skuCategoryAndType).skuCode(addRequest.getSkuCode()).creationTime(clock.millis()).modifiedTime(clock.millis())
+                .productionTime(addRequest.getProductionTime()).inventoryStatus(inventoryInboundRequest.getInventoryStatus()).build()).collect(Collectors.toList());
         new ListAssert(actualInventory).usingRecursiveFieldByFieldElementComparatorIgnoringFields("creationTime", "modifiedTime")
                 .containsExactlyInAnyOrderElementsOf(expectedInventory);
 
@@ -198,7 +198,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequest));
         String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(inventoryInboundRequest.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
@@ -227,7 +227,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequest));
 
         String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
@@ -270,7 +270,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         inventoryDynamoDAO.outbound(outboundRequest);
 
         String warehouseContainerId = String.join(DELIMITER, inboundRequest.getWarehouseId(), inboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(request.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
@@ -318,7 +318,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).build();
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.outbound(outboundRequest));
         String warehouseContainerId = String.join(DELIMITER, outboundRequest.getWarehouseId(), outboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(request.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
@@ -351,7 +351,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.outbound(outboundRequest));
 
         String warehouseContainerId = String.join(DELIMITER, outboundRequest.getWarehouseId(), outboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id)).collect(Collectors.toList());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);

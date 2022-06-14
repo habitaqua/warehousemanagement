@@ -17,6 +17,10 @@ public class Inventory {
     @DynamoDBHashKey(attributeName = "uniqueProductId")
     private String uniqueProductId;
 
+    @DynamoDBRangeKey(attributeName = "companyId")
+    private String companyId;
+
+
     @DynamoDBAttribute(attributeName = "warehouseId")
     private String warehouseId;
 
@@ -37,8 +41,6 @@ public class Inventory {
     @DynamoDBAttribute(attributeName = "productionTime")
     private Long productionTime;
 
-    @DynamoDBAttribute(attributeName = "companyId")
-    private String companyId;
 
     @DynamoDBAttribute(attributeName = "inventoryStatus")
     @DynamoDBTypeConverted(converter = InventoryStatusTypeConvertor.class)
