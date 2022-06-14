@@ -30,10 +30,9 @@ public class WarehouseIdValidator implements WarehouseActionEntitiesValidator {
 
         String companyId = input.getCompanyId();
         String warehouseId = input.getWarehouseId();
-        Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
 
-        Optional<WarehouseDTO> warehouseDTO = warehouseService.getWarehouse(warehouseId, companyId);
+        Optional<WarehouseDTO> warehouseDTO = warehouseService.getWarehouse(warehouseId);
         if (!warehouseDTO.isPresent()) {
             String message = String.format("warehouseId %s and companyId %s mapping does not exist", warehouseId, companyId);
             throw new ResourceNotAvailableException(message);

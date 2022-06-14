@@ -21,5 +21,9 @@ public class WarehouseService {
     public Optional<WarehouseDTO> getWarehouse(String warehouseId, String companyId) {
         return warehouseDAO.getWarehouse(warehouseId, companyId);
     }
+
+    public Optional<WarehouseDTO> getWarehouse(String warehouseId) {
+        return warehouseDAO.getWarehouse(warehouseId);
+    }
 }
 

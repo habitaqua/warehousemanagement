@@ -16,7 +16,7 @@ import java.util.Optional;
 import static org.mockito.Matchers.eq;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestCustomerWiseIncrementalInboundIdGenerator {
+public class TestWarehouseWiseIncrementalInboundIdGenerator {
 
     public static final String WAREHOUSE_1 = "warehouse-1";
     public static final String USER_1 = "user-1";
