@@ -1,7 +1,6 @@
 package org.habitbev.warehousemanagement.dao;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.KeyPair;
 import com.amazonaws.services.dynamodbv2.model.*;
@@ -9,7 +8,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
-import com.google.inject.name.Names;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.ContainerStatus;
@@ -20,8 +18,8 @@ import org.habitbev.warehousemanagement.entities.dynamodb.ContainerCapacity;
 import org.habitbev.warehousemanagement.entities.dynamodb.Inventory;
 import org.habitbev.warehousemanagement.entities.exceptions.ResourceAlreadyExistsException;
 import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequestDTO;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequestDTO;
 import org.habitbev.warehousemanagement.entities.inventory.MoveInventoryRequest;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Production;
@@ -110,7 +108,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
      *
      * @param inboundRequest
      */
-    public void inbound(InventoryInboundRequest inboundRequest) {
+    public void inbound(InventoryInboundRequestDTO inboundRequest) {
         try {
             Preconditions.checkArgument(inboundRequest != null, "inboundRequest cannot be null");
 
@@ -161,7 +159,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
      *
      * @param outboundRequest
      */
-    public void outbound(InventoryOutboundRequest outboundRequest) {
+    public void outbound(InventoryOutboundRequestDTO outboundRequest) {
         try {
             Preconditions.checkArgument(outboundRequest!= null, "outboundRequest cannot be null");
             List<String> uniqueProductIds = outboundRequest.getUniqueProductIds();
@@ -267,19 +265,19 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
     }
 
 
-    private Update constructUpdateExpression(String itemId, InventoryInboundRequest inventoryInboundRequest) {
+    private Update constructUpdateExpression(String itemId, InventoryInboundRequestDTO inventoryInboundRequestDTO) {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
-        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequest.getCompanyId()));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequestDTO.getCompanyId()));
 
-        InventoryStatus newInventoryStatus = inventoryInboundRequest.getInventoryStatus();
+        InventoryStatus newInventoryStatus = inventoryInboundRequestDTO.getInventoryStatus();
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
         long currentTime = clock.millis();
         updatedAttributes.put(":new_status", new AttributeValue(newInventoryStatus.getStatus()));
-        updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequest.getInboundId()));
-        updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequest.getContainerId()));
-        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequest.getWarehouseId()));
+        updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequestDTO.getInboundId()));
+        updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequestDTO.getContainerId()));
+        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequestDTO.getWarehouseId()));
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));
 
         String previousStatus = getAppendedStatusString(newInventoryStatus, updatedAttributes);
@@ -294,21 +292,21 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
     }
 
 
-    private Update constructUpdateExpression(String itemId, InventoryOutboundRequest inventoryOutboundRequest) {
+    private Update constructUpdateExpression(String itemId, InventoryOutboundRequestDTO inventoryOutboundRequestDTO) {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
-        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequest.getCompanyId()));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequestDTO.getCompanyId()));
 
-        InventoryStatus newInventoryStatus = inventoryOutboundRequest.getInventoryStatus();
+        InventoryStatus newInventoryStatus = inventoryOutboundRequestDTO.getInventoryStatus();
 
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
 
         updatedAttributes.put(":new_status", new AttributeValue(newInventoryStatus.getStatus()));
-        updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequest.getOutboundId()));
-        updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequest.getOrderId()));
-        updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequest.getContainerId()));
-        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequest.getWarehouseId()));
+        updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequestDTO.getOutboundId()));
+        updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequestDTO.getOrderId()));
+        updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequestDTO.getContainerId()));
+        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequestDTO.getWarehouseId()));
 
         long currentTime = clock.millis();
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));

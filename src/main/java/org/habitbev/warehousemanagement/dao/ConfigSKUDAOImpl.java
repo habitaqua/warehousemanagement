@@ -3,6 +3,7 @@ package org.habitbev.warehousemanagement.dao;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
+import org.habitbev.warehousemanagement.entities.exceptions.ResourceNotAvailableException;
 import org.habitbev.warehousemanagement.entities.sku.SKU;
 import org.habitbev.warehousemanagement.entities.sku.SKUDTO;
 
@@ -24,7 +25,7 @@ public class ConfigSKUDAOImpl implements SKUDAO {
     @Override
     public List<SKUDTO> getAll(String companyId) {
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
-        return companyIdToSKUMapping.getOrDefault(companyId, new HashMap<>()).values().stream().map(sku-> SKUDTO.fromSKU(sku)).collect(Collectors.toList());
+        return companyIdToSKUMapping.getOrDefault(companyId, new HashMap<>()).values().stream().map(sku -> SKUDTO.fromSKU(sku)).collect(Collectors.toList());
     }
 
     @Override
@@ -33,7 +34,11 @@ public class ConfigSKUDAOImpl implements SKUDAO {
         Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
 
         SKU sku = companyIdToSKUMapping.get(companyId).get(skuCode);
-       return Optional.ofNullable(SKUDTO.fromSKU(sku));
+        if (sku == null) {
+            String message = String.format("Given companyId %s and skuCode %s combination does not exist", companyId, skuCode);
+            throw new ResourceNotAvailableException(message);
+        }
+        return Optional.ofNullable(SKUDTO.fromSKU(sku));
 
     }
 }

@@ -1,8 +1,8 @@
 package org.habitbev.warehousemanagement.dao;
 
 import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequestDTO;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequestDTO;
 import org.habitbev.warehousemanagement.entities.inventory.MoveInventoryRequest;
 
 import java.util.List;
@@ -17,17 +17,17 @@ public interface InventoryDAO {
      * idempotent for upi using InventoryStatus
      * transact write of adding inventory item and changing location capacity.
      *
-     * @param inventoryInboundRequest
+     * @param inventoryInboundRequestDTO
      */
-     void inbound(InventoryInboundRequest inventoryInboundRequest);
+     void inbound(InventoryInboundRequestDTO inventoryInboundRequestDTO);
 
     /**
      * idempotent for upi using InventoryStatus
      * transact write of adding inventory item and changing location capacity.
      *
-     * @param inventoryOutboundRequest
+     * @param inventoryOutboundRequestDTO
      */
-     void outbound(InventoryOutboundRequest inventoryOutboundRequest);
+     void outbound(InventoryOutboundRequestDTO inventoryOutboundRequestDTO);
 
 
      void move(MoveInventoryRequest moveInventoryRequest);

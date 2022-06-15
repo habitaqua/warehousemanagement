@@ -11,6 +11,8 @@ import org.habitbev.warehousemanagement.entities.container.GetContainerRequest;
 import org.habitbev.warehousemanagement.entities.exceptions.NonRetriableException;
 import org.habitbev.warehousemanagement.entities.exceptions.RetriableException;
 import org.habitbev.warehousemanagement.entities.inventory.*;
+import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Inbound;
+import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Outbound;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Production;
 import org.habitbev.warehousemanagement.helpers.validators.WarehouseActionValidatorChain;
 
@@ -97,11 +99,11 @@ public class InventoryService {
         Integer maxCapacity = validatedContainerDTO.getSkuCodeWisePredefinedCapacity().get(inboundReq.getSkuCode());
 
         List<List<String>> uniqueProductIdsSubList = Lists.partition(uniqueProductIdsToInbound, INBOUND_SUBLIST_SIZE);
-        List<InventoryInboundRequest> partitionedInventoryInboundRequests = uniqueProductIdsSubList.stream().map(list -> InventoryInboundRequest.builder().uniqueProductIds(list)
-                .inventoryStatus(inboundReq.getInventoryStatus()).containerId(containerId)
+        List<InventoryInboundRequestDTO> partitionedInventoryInboundRequestDTOS = uniqueProductIdsSubList.stream().map(list -> InventoryInboundRequestDTO.builder().uniqueProductIds(list)
+                .inventoryStatus(new Inbound()).containerId(containerId)
                 .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).inboundId(inboundId)
                 .skuCode(warehouseValidatedEntities.getSkuDTO().getSkuCode()).build()).collect(Collectors.toList());
-        partitionedInventoryInboundRequests.forEach(partitionedInventoryInboundRequest -> inventoryDAO.inbound(partitionedInventoryInboundRequest));
+        partitionedInventoryInboundRequestDTOS.forEach(partitionedInventoryInboundRequest -> inventoryDAO.inbound(partitionedInventoryInboundRequest));
     }
 
     public void outbound(InventoryOutboundRequest outboundReq) {
@@ -119,12 +121,12 @@ public class InventoryService {
         String warehouseId = validatedContainerDTO.getWarehouseId();
 
         List<List<String>> uniqueProductIdsSubList = Lists.partition(uniqueProductIdsToOutbound, FULFILL_SUBLIST_SIZE);
-        List<InventoryOutboundRequest> partitionedInventoryOutboundRequests = uniqueProductIdsSubList.stream().map(list -> InventoryOutboundRequest.builder()
+        List<InventoryOutboundRequestDTO> partitionedInventoryOutboundRequestDTOS = uniqueProductIdsSubList.stream().map(list -> InventoryOutboundRequestDTO.builder()
                 .uniqueProductIds(list)
-                .inventoryStatus(outboundReq.getInventoryStatus()).containerId(containerId)
+                .inventoryStatus(new Outbound()).containerId(containerId)
                 .warehouseId(warehouseId).containerMaxCapacity(maxCapacity).outboundId(outboundReq.getOutboundId())
                 .orderId(outboundReq.getOrderId()).skuCode(outboundReq.getSkuCode()).build()).collect(Collectors.toList());
-        partitionedInventoryOutboundRequests.forEach(partitionedInventoryOutboundRequest -> inventoryDAO.outbound(partitionedInventoryOutboundRequest));
+        partitionedInventoryOutboundRequestDTOS.forEach(partitionedInventoryOutboundRequest -> inventoryDAO.outbound(partitionedInventoryOutboundRequest));
     }
 
     public void move(MoveInventoryRequest moveInventoryRequest) {

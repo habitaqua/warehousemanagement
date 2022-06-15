@@ -1,6 +1,5 @@
 package org.habitbev.warehousemanagement.entities.inventory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import lombok.Builder;
 import lombok.Value;
@@ -15,37 +14,32 @@ import java.util.List;
  * Adding of inventory at a bulk level. Happens against a containerId.
  */
 @Value
-public class InventoryInboundRequest {
+public class InventoryInboundRequestDTO {
 
-    @JsonProperty("uniqueProductIds")
     List<String> uniqueProductIds;
 
-    @JsonProperty("inboundId")
     String inboundId;
-
-    @JsonProperty("skuCode")
     String skuCode;
-
-    @JsonProperty("containerId")
     String containerId;
-
-    @JsonProperty("warehouseId")
     String warehouseId;
 
-    @JsonProperty("companyId")
     String companyId;
+    InventoryStatus inventoryStatus;
 
-
+    int containerMaxCapacity;
 
     @Builder
-    private InventoryInboundRequest(List<String> uniqueProductIds, String skuCode, String containerId, String inboundId,
-                                    String warehouseId, String companyId) {
+    private InventoryInboundRequestDTO(List<String> uniqueProductIds, String skuCode, String containerId, String inboundId,
+                                       String warehouseId, String companyId, InventoryStatus inventoryStatus, int containerMaxCapacity) {
         Preconditions.checkArgument(CollectionUtils.isNotEmpty(uniqueProductIds), "uniqueProductIds cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), " sku code cannot be null");
         Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
+        Preconditions.checkArgument(inventoryStatus != null, "inventoryStatus cannot be null");
+        Preconditions.checkArgument(containerMaxCapacity >0, "max Capacity cannot be null");
+
 
         this.uniqueProductIds = uniqueProductIds;
         this.skuCode = skuCode;
@@ -53,5 +47,7 @@ public class InventoryInboundRequest {
         this.containerId = containerId;
         this.warehouseId = warehouseId;
         this.companyId = companyId;
+        this.inventoryStatus = inventoryStatus;
+        this.containerMaxCapacity = containerMaxCapacity;
     }
 }

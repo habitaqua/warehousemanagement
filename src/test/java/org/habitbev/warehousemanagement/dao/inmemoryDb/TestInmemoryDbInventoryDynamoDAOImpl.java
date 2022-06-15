@@ -21,7 +21,7 @@ import org.habitbev.warehousemanagement.entities.container.containerstatus.Parti
 import org.habitbev.warehousemanagement.entities.dynamodb.Inventory;
 import org.habitbev.warehousemanagement.entities.exceptions.InconsistentStateException;
 import org.habitbev.warehousemanagement.entities.exceptions.ResourceAlreadyExistsException;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequestDTO;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Inbound;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Outbound;
 import org.habitbev.warehousemanagement.testutils.LocalDbCreationRule;
@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.habitbev.warehousemanagement.dao.ContainerCapacityDAO;
 import org.habitbev.warehousemanagement.entities.dynamodb.ContainerCapacity;
 import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequestDTO;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Production;
 import org.habitbev.warehousemanagement.helpers.ContainerStatusDeterminer;
 
@@ -163,10 +163,10 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.add(addRequest);
 
-        InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inventoryInboundRequestDTO = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
-        inventoryDynamoDAO.inbound(inventoryInboundRequest);
-        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
+        inventoryDynamoDAO.inbound(inventoryInboundRequestDTO);
+        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
 
 
         List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
@@ -176,17 +176,17 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         List<Inventory> actualInventory = objects.stream().map(object -> (Inventory) object).collect(Collectors.toList());
         String skuCategoryAndType = String.join(DELIMITER, addRequest.getSkuCategory(), addRequest.getSkuType());
         List<Inventory> expectedInventory = UNIQUE_PRODUCT_IDS_1.stream().map(id -> Inventory.builder().uniqueProductId(id)
-                .warehouseId(addRequest.getWarehouseId()).companyId(addRequest.getCompanyId()).containerId(inventoryInboundRequest.getContainerId())
-                .inboundId(inventoryInboundRequest.getInboundId()).skuCategoryType(skuCategoryAndType).skuCode(addRequest.getSkuCode()).creationTime(clock.millis()).modifiedTime(clock.millis())
-                .productionTime(addRequest.getProductionTime()).inventoryStatus(inventoryInboundRequest.getInventoryStatus()).build()).collect(Collectors.toList());
+                .warehouseId(addRequest.getWarehouseId()).companyId(addRequest.getCompanyId()).containerId(inventoryInboundRequestDTO.getContainerId())
+                .inboundId(inventoryInboundRequestDTO.getInboundId()).skuCategoryType(skuCategoryAndType).skuCode(addRequest.getSkuCode()).creationTime(clock.millis()).modifiedTime(clock.millis())
+                .productionTime(addRequest.getProductionTime()).inventoryStatus(inventoryInboundRequestDTO.getInventoryStatus()).build()).collect(Collectors.toList());
         new ListAssert(actualInventory).usingRecursiveFieldByFieldElementComparatorIgnoringFields("creationTime", "modifiedTime")
                 .containsExactlyInAnyOrderElementsOf(expectedInventory);
 
 
-        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
+        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
         new BooleanAssert(containerCapacityActualOp.isPresent()).isEqualTo(true);
         ContainerCapacity containerCapacityExpected = ContainerCapacity.builder().containerStatus(new PartiallyFilled())
-                .currentCapacity(inventoryInboundRequest.getUniqueProductIds().size()).warehouseContainerId(warehouseContainerId)
+                .currentCapacity(inventoryInboundRequestDTO.getUniqueProductIds().size()).warehouseContainerId(warehouseContainerId)
                 .creationTime(clock.millis()).modifiedTime(clock.millis()).build();
         RecursiveComparisonConfiguration ignoreFields = RecursiveComparisonConfiguration.builder().withIgnoredFields("creationTime", "modifiedTime").build();
         new ObjectAssert<ContainerCapacity>(containerCapacityActualOp.get()).usingRecursiveComparison(ignoreFields).isEqualTo(containerCapacityExpected);
@@ -194,17 +194,17 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
     @Test
     public void test_inbound_non_generated_ids() {
-        InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inventoryInboundRequestDTO = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
-        Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequest));
-        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
-        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(inventoryInboundRequest.getCompanyId())).collect(Collectors.toList());
+        Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequestDTO));
+        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
+        List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(inventoryInboundRequestDTO.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
         List<Object> objects = inventoryObjects.get(INVENTORY_TABLE_NAME);
         new BooleanAssert(objects.size() == 0).isEqualTo(true);
 
-        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
+        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
         new BooleanAssert(containerCapacityActualOp.isPresent()).isEqualTo(true);
         ContainerCapacity containerCapacityExpected = ContainerCapacity.builder().containerStatus(new PartiallyFilled())
                 .currentCapacity(0).warehouseContainerId(warehouseContainerId)
@@ -222,11 +222,11 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.add(addRequest);
 
-        InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inventoryInboundRequestDTO = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
-        Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequest));
+        Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.inbound(inventoryInboundRequestDTO));
 
-        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
+        String warehouseContainerId = String.join(DELIMITER, inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
         List<KeyPair> keyPairsToLoad = UNIQUE_PRODUCT_IDS_1.stream().map(id -> new KeyPair().withHashKey(id).withRangeKey(addRequest.getCompanyId())).collect(Collectors.toList());
 
         Map<String, List<Object>> inventoryObjects = dynamoDBMapper.batchLoad(ImmutableMap.of(Inventory.class, keyPairsToLoad));
@@ -241,7 +241,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
                 .containsExactlyInAnyOrderElementsOf(expectedInventory);
 
 
-        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequest.getWarehouseId(), inventoryInboundRequest.getContainerId());
+        Optional<ContainerCapacity> containerCapacityActualOp = containerCapacityDAO.get(inventoryInboundRequestDTO.getWarehouseId(), inventoryInboundRequestDTO.getContainerId());
         new BooleanAssert(containerCapacityActualOp.isPresent()).isEqualTo(true);
         ContainerCapacity containerCapacityExpected = ContainerCapacity.builder().containerStatus(new PartiallyFilled())
                 .currentCapacity(0).warehouseContainerId(warehouseContainerId)
@@ -259,12 +259,12 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.add(request);
 
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         inventoryDynamoDAO.inbound(inboundRequest);
 
         List<String> outboundIds = UNIQUE_PRODUCT_IDS_1.subList(0, 3);
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(outboundIds).build();
         inventoryDynamoDAO.outbound(outboundRequest);
@@ -308,12 +308,12 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
 
         inventoryDynamoDAO.add(request);
 
-        InventoryInboundRequest inventoryInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inventoryInboundRequestDTO = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_2).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
-        inventoryDynamoDAO.inbound(inventoryInboundRequest);
+        inventoryDynamoDAO.inbound(inventoryInboundRequestDTO);
 
 
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).build();
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.outbound(outboundRequest));
@@ -341,11 +341,11 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).productionTime(productionTime).build();
 
         inventoryDynamoDAO.add(addRequest);
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         inventoryDynamoDAO.inbound(inboundRequest);
 
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_2)
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).companyId(COMPANY_2)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).build();
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(() -> inventoryDynamoDAO.outbound(outboundRequest));
@@ -393,7 +393,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new IntegerAssert(containerCapacityAfterAdd.get().getCurrentCapacity()).isEqualTo(0);
 
 
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         inventoryDynamoDAO.inbound(inboundRequest);
 
@@ -403,7 +403,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new IntegerAssert(containerCapacityAfterPartialInbound.get().getCurrentCapacity()).isEqualTo(4);
 
 
-        InventoryInboundRequest fullInboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO fullInboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(ImmutableList.of("5")).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         inventoryDynamoDAO.inbound(fullInboundRequest);
 
@@ -412,7 +412,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new StringAssert(containerCapacityAfterFullInbound.get().getContainerStatus().toString()).isEqualTo(new Filled().toString());
         new IntegerAssert(containerCapacityAfterFullInbound.get().getCurrentCapacity()).isEqualTo(5);
 
-        InventoryOutboundRequest partialOutboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
+        InventoryOutboundRequestDTO partialOutboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).build();
 
@@ -422,7 +422,7 @@ public class TestInmemoryDbInventoryDynamoDAOImpl {
         new IntegerAssert(containerCapacityAfterPartialOutbound.get().getCurrentCapacity()).isEqualTo(1);
 
 
-        InventoryOutboundRequest fullOutboundrequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
+        InventoryOutboundRequestDTO fullOutboundrequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).companyId(COMPANY_1)
                 .inventoryStatus(new Outbound()).containerId(CONTAINER_1).warehouseId(WAREHOUSE_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .orderId(ORDER_1).skuCode(SKU_CODE).uniqueProductIds(ImmutableList.of("5")).build();
 

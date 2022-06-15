@@ -8,7 +8,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import lombok.extern.slf4j.Slf4j;
 import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequestDTO;
 import org.habitbev.warehousemanagement.guice.MainModule;
 import org.habitbev.warehousemanagement.service.InventoryService;
 
@@ -24,11 +24,8 @@ public class InboundInventoryHandler implements RequestHandler<Map<String, Objec
 
     public InboundInventoryHandler() {
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.inventoryService = injector.getInstance(InventoryService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
 
     }
 

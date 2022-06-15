@@ -36,9 +36,9 @@ public class WarehouseActionValidatorChainProvider implements Provider<Warehouse
 
     @Override
     public WarehouseActionValidatorChain get() {
-        List<WarehouseActionEntitiesValidator> inventoryInboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator, containerForInboundValidator, inboundIdValidator);
+        List<WarehouseActionEntitiesValidator> inventoryInboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator,inboundIdValidator, containerForInboundValidator);
 
-        List<WarehouseActionEntitiesValidator> inventoryOutboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator, containerForOutboundValidator, outboundIdValidator);
+        List<WarehouseActionEntitiesValidator> inventoryOutboundValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator, outboundIdValidator, containerForOutboundValidator);
         List<WarehouseActionEntitiesValidator> skuBarcodeGenerationValidators = ImmutableList.of(warehouseIdValidator, skuCodeValidator);
         List<WarehouseActionEntitiesValidator> startInboundValidators = ImmutableList.of(warehouseIdValidator);
         List<WarehouseActionEntitiesValidator> endInboundValidators = ImmutableList.of(inboundIdValidator);

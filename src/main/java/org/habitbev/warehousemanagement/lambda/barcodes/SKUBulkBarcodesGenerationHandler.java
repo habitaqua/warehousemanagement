@@ -7,12 +7,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import lombok.extern.slf4j.Slf4j;
 import org.habitbev.warehousemanagement.entities.SKUBarcodesGenerationRequest;
 import org.habitbev.warehousemanagement.service.SKUBulkBarcodesCreationService;
 import org.habitbev.warehousemanagement.guice.MainModule;
 
 import java.util.Map;
 
+@Slf4j
 public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
     private org.habitbev.warehousemanagement.service.SKUBulkBarcodesCreationService SKUBulkBarcodesCreationService;
@@ -41,9 +43,18 @@ public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<Stri
                     .withStatusCode(200)
                     .withBody(downloadURL)
                     .withIsBase64Encoded(false);
+        } catch (IllegalArgumentException e) {
+            log.error("invalid input for end inbound request", e);
+            return new APIGatewayProxyResponseEvent()
+                    .withStatusCode(400)
+                    .withBody(e.getMessage())
+                    .withIsBase64Encoded(false);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            throw new RuntimeException(e);
+            log.error("Exception occurred while creating barcodes", e);
+            return new APIGatewayProxyResponseEvent()
+                    .withBody(e.getMessage())
+                    .withStatusCode(500)
+                    .withIsBase64Encoded(false);
         }
     }
 }

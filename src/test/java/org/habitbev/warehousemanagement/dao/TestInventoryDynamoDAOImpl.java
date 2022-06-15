@@ -27,8 +27,8 @@ import org.habitbev.warehousemanagement.entities.exceptions.NonRetriableExceptio
 import org.habitbev.warehousemanagement.entities.exceptions.ResourceAlreadyExistsException;
 import org.habitbev.warehousemanagement.entities.exceptions.RetriableException;
 import org.habitbev.warehousemanagement.entities.inventory.InventoryAddRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequest;
-import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequest;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryInboundRequestDTO;
+import org.habitbev.warehousemanagement.entities.inventory.InventoryOutboundRequestDTO;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Inbound;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.Outbound;
@@ -239,7 +239,7 @@ public class TestInventoryDynamoDAOImpl {
     @Test
     public void test_inbound_success() {
 
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         int assumedExistingCapacity = 1;
         when(containerCapacityDAO.getExistingQuantity(eq(inboundRequest.getWarehouseId()), eq(inboundRequest.getContainerId()))).thenReturn(assumedExistingCapacity);
@@ -260,7 +260,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_inbound_transaction_cancelled_exception() {
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         int assumedExistingCapacity = 1;
         when(containerCapacityDAO.getExistingQuantity(eq(inboundRequest.getWarehouseId()), eq(inboundRequest.getContainerId()))).thenReturn(assumedExistingCapacity);
@@ -283,7 +283,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_inbound_internal_server_exception() {
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         when(containerCapacityDAO.getExistingQuantity(eq(inboundRequest.getWarehouseId()), eq(inboundRequest.getContainerId()))).thenThrow(new InternalServerErrorException("internal server exception"));
         Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(()->inventoryDynamoDAO.inbound(inboundRequest))
@@ -298,7 +298,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_inbound_exception() {
-        InventoryInboundRequest inboundRequest = InventoryInboundRequest.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
+        InventoryInboundRequestDTO inboundRequest = InventoryInboundRequestDTO.builder().inboundId(INBOUND_1).inventoryStatus(new Inbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY).uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         when(containerCapacityDAO.getExistingQuantity(eq(inboundRequest.getWarehouseId()), eq(inboundRequest.getContainerId()))).thenThrow(new RuntimeException("runtime exception"));
         Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(()->inventoryDynamoDAO.inbound(inboundRequest))
@@ -321,7 +321,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_outbound_success() {
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).orderId(ORDER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         int assumedExistingCapacity = 5;
@@ -343,7 +343,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_outbound_transaction_cancelled() {
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).orderId(ORDER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();
         int assumedExistingCapacity = 5;
@@ -368,7 +368,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_outbound_internal_server_exception() {
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).orderId(ORDER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();  when(containerCapacityDAO.getExistingQuantity(eq(outboundRequest.getWarehouseId()),
                 eq(outboundRequest.getContainerId()))).thenThrow(new InternalServerErrorException("internal server exception"));
@@ -385,7 +385,7 @@ public class TestInventoryDynamoDAOImpl {
 
     @Test
     public void test_outbound_exception() {
-        InventoryOutboundRequest outboundRequest = InventoryOutboundRequest.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
+        InventoryOutboundRequestDTO outboundRequest = InventoryOutboundRequestDTO.builder().outboundId(OUTBOUND_1).inventoryStatus(new Outbound())
                 .skuCode(SKU_CODE).containerId(CONTAINER_1).orderId(ORDER_1).containerMaxCapacity(CONTAINER_MAX_CAPACITY)
                 .uniqueProductIds(UNIQUE_PRODUCT_IDS_1).companyId(COMPANY_1).warehouseId(WAREHOUSE_1).build();  when(containerCapacityDAO.getExistingQuantity(eq(outboundRequest.getWarehouseId()),
                 eq(outboundRequest.getContainerId()))).thenThrow(new RuntimeException("runtime exception"));
@@ -470,7 +470,7 @@ public class TestInventoryDynamoDAOImpl {
     }
 
 
-    private TransactWriteItemsRequest getExpectedTransactWriteItemsRequest(InventoryInboundRequest inboundRequest, int existingCapacity, int newCapacity) {
+    private TransactWriteItemsRequest getExpectedTransactWriteItemsRequest(InventoryInboundRequestDTO inboundRequest, int existingCapacity, int newCapacity) {
         List<TransactWriteItem> transactWrites = inboundRequest.getUniqueProductIds().stream()
                 .map(itemId -> new TransactWriteItem().withUpdate(constructUpdateExpression(itemId, inboundRequest))).collect(toList());
         Update updateCapacityExpression = constructUpdateContainerCapacityExpression(inboundRequest.getWarehouseId(), inboundRequest.getContainerId(), existingCapacity, newCapacity
@@ -482,7 +482,7 @@ public class TestInventoryDynamoDAOImpl {
         return addInventoryTransaction;
     }
 
-    private TransactWriteItemsRequest getExpectedTransactWriteItemsRequest(InventoryOutboundRequest outboundRequest, int existingCapacity, int newCapacity) {
+    private TransactWriteItemsRequest getExpectedTransactWriteItemsRequest(InventoryOutboundRequestDTO outboundRequest, int existingCapacity, int newCapacity) {
         List<TransactWriteItem> transactWrites = outboundRequest.getUniqueProductIds().stream()
                 .map(itemId -> new TransactWriteItem().withUpdate(constructUpdateExpression(itemId, outboundRequest))).collect(toList());
         Update updateCapacityExpression = constructUpdateContainerCapacityExpression(outboundRequest.getWarehouseId(), outboundRequest.getContainerId(), existingCapacity, newCapacity
@@ -494,21 +494,21 @@ public class TestInventoryDynamoDAOImpl {
         return addInventoryTransaction;
     }
 
-    private Update constructUpdateExpression(String itemId, InventoryOutboundRequest inventoryOutboundRequest) {
+    private Update constructUpdateExpression(String itemId, InventoryOutboundRequestDTO inventoryOutboundRequestDTO) {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
-        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequest.getCompanyId()));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryOutboundRequestDTO.getCompanyId()));
 
-        InventoryStatus newInventoryStatus = inventoryOutboundRequest.getInventoryStatus();
+        InventoryStatus newInventoryStatus = inventoryOutboundRequestDTO.getInventoryStatus();
 
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
 
         updatedAttributes.put(":new_status", new AttributeValue(newInventoryStatus.getStatus()));
-        updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequest.getOutboundId()));
-        updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequest.getOrderId()));
-        updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequest.getContainerId()));
-        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequest.getWarehouseId()));
+        updatedAttributes.put(":outbound_id", new AttributeValue(inventoryOutboundRequestDTO.getOutboundId()));
+        updatedAttributes.put(":order_id", new AttributeValue(inventoryOutboundRequestDTO.getOrderId()));
+        updatedAttributes.put(":container_id", new AttributeValue(inventoryOutboundRequestDTO.getContainerId()));
+        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryOutboundRequestDTO.getWarehouseId()));
 
         long currentTime = EPOCH_MILLI;
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));
@@ -550,18 +550,18 @@ public class TestInventoryDynamoDAOImpl {
         return update;
     }
 
-    private Update constructUpdateExpression(String itemId, InventoryInboundRequest inventoryInboundRequest) {
+    private Update constructUpdateExpression(String itemId, InventoryInboundRequestDTO inventoryInboundRequestDTO) {
 
         Map<String, AttributeValue> inventoryKey = new HashMap<>();
         inventoryKey.put("uniqueProductId", new AttributeValue().withS(itemId));
-        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequest.getCompanyId()));
+        inventoryKey.put("companyId", new AttributeValue().withS(inventoryInboundRequestDTO.getCompanyId()));
 
-        InventoryStatus newInventoryStatus = inventoryInboundRequest.getInventoryStatus();
+        InventoryStatus newInventoryStatus = inventoryInboundRequestDTO.getInventoryStatus();
         Map<String, AttributeValue> updatedAttributes = new HashMap<>();
         updatedAttributes.put(":new_status", new AttributeValue(newInventoryStatus.getStatus()));
-        updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequest.getInboundId()));
-        updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequest.getContainerId()));
-        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequest.getWarehouseId()));
+        updatedAttributes.put(":inbound_id", new AttributeValue(inventoryInboundRequestDTO.getInboundId()));
+        updatedAttributes.put(":container_id", new AttributeValue(inventoryInboundRequestDTO.getContainerId()));
+        updatedAttributes.put(":warehouse_id", new AttributeValue(inventoryInboundRequestDTO.getWarehouseId()));
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(EPOCH_MILLI)));
 
         String previousStatus = getAppendedStatusString(newInventoryStatus, updatedAttributes);

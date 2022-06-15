@@ -23,11 +23,8 @@ public class OutboundInventoryHandler implements RequestHandler<Map<String, Obje
 
     public OutboundInventoryHandler() {
         this.injector = Guice.createInjector(new MainModule());
-        System.out.println("injection started1");
         this.inventoryService = injector.getInstance(InventoryService.class);
-        System.out.println("injection started2");
         this.objectMapper = injector.getInstance(ObjectMapper.class);
-        System.out.println("injection started3");
 
     }
 

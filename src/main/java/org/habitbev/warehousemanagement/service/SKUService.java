@@ -29,11 +29,6 @@ public class SKUService {
     public SKUDTO get(String companyId, String skuCode) {
 
         Optional<SKUDTO> skuOp = skudao.get(companyId, skuCode);
-        if (!skuOp.isPresent()) {
-
-            String message = String.format("Given companyId %s and skuCode %s combination does not exist", companyId, skuCode);
-            throw new ResourceNotAvailableException(message);
-        }
         return skuOp.get();
     }
 }
