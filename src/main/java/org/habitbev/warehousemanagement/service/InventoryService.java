@@ -88,7 +88,7 @@ public class InventoryService {
         Preconditions.checkArgument(inboundReq != null, "inboundReq cannot be null");
 
         List<String> uniqueProductIdsToInbound = inboundReq.getUniqueProductIds();
-        WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder().warehouseAction(INVENTORY_INBOUND)
+        WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder().warehouseAction(INVENTORY_INBOUND).warehouseId(inboundReq.getWarehouseId())
                 .inboundId(inboundReq.getInboundId()).capacityToInbound(uniqueProductIdsToInbound.size())
                 .companyId(inboundReq.getCompanyId()).containerId(inboundReq.getContainerId()).skuCode(inboundReq.getSkuCode()).build();
         WarehouseValidatedEntities warehouseValidatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);

@@ -48,14 +48,23 @@ public class ContainerDynamoDAOImpl implements ContainerDAO {
 
     public Optional<ContainerDTO> getContainer(GetContainerRequest getContainerRequest) {
 
-        String warehouseId = getContainerRequest.getWarehouseId();
-        String containerId = getContainerRequest.getContainerId();
-        Container container = containerDynamoDbMapper.load(Container.class, warehouseId, containerId);
-        if (container == null) {
-            return Optional.empty();
+        Preconditions.checkArgument(getContainerRequest != null, "getContainerRequest cannot be null");
+        try {
+            String warehouseId = getContainerRequest.getWarehouseId();
+            String containerId = getContainerRequest.getContainerId();
+            Container container = containerDynamoDbMapper.load(Container.class, warehouseId, containerId);
+            if (container == null) {
+                return Optional.empty();
+            }
+            ContainerDTO.Builder containerDTOBuilder = new ContainerDTO.Builder().containerDetails(container);
+            return Optional.ofNullable(containerDTOBuilder.build());
+        } catch (InternalServerErrorException e) {
+            log.error("Retriable Error occured while starting inbound", e);
+            throw new RetriableException(e);
+        } catch (Exception e) {
+            log.error("Non Retriable Error occured while starting inbound", e);
+            throw new NonRetriableException(e);
         }
-        ContainerDTO.Builder containerDTOBuilder = new ContainerDTO.Builder().containerDetails(container);
-        return Optional.ofNullable(containerDTOBuilder.build());
     }
 
     /**
@@ -117,12 +126,10 @@ public class ContainerDynamoDAOImpl implements ContainerDAO {
             expected.put("containerId", new ExpectedAttributeValue().withExists(false));
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             containerDynamoDbMapper.save(container, dynamoDBSaveExpression);
-        } catch (
-                InternalServerErrorException e) {
+        } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while starting inbound", e);
             throw new RetriableException(e);
-        } catch (
-                ConditionalCheckFailedException ce) {
+        } catch (ConditionalCheckFailedException ce) {
             log.error("container id", containerDTO.getContainerId(), " already exist in given warehouse",
                     containerDTO.getWarehouseId(), ce);
             throw new ResourceAlreadyExistsException(ce);

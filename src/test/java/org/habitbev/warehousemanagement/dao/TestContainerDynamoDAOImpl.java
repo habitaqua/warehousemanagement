@@ -10,6 +10,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.BooleanAssert;
+import org.assertj.core.api.ObjectAssert;
+import org.habitbev.warehousemanagement.entities.container.GetContainerRequest;
 import org.habitbev.warehousemanagement.entities.dynamodb.FinishedGoodsInbound;
 import org.habitbev.warehousemanagement.entities.exceptions.NonRetriableException;
 import org.habitbev.warehousemanagement.entities.exceptions.RetriableException;
@@ -28,6 +30,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 //TODO getContainers test case
 @RunWith(MockitoJUnitRunner.class)
@@ -79,12 +85,12 @@ public class TestContainerDynamoDAOImpl {
                 .creationTime(TIME_NOW).modifiedTime(TIME_NOW).predefinedCapacity(PREDEFINED_CAPACITY).build();
 
         containerDynamoDAO.add(containerDTO);
-        Mockito.verify(clock).millis();
-        Mockito.verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        verify(clock).millis();
+        verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyAdd(containerDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
         Mockito.verifyNoMoreInteractions(clock);
-        Mockito.verifyZeroInteractions(objectMapper);
+        verifyZeroInteractions(objectMapper);
 
 
     }
@@ -99,12 +105,12 @@ public class TestContainerDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(ResourceAlreadyExistsException.class)
                 .isThrownBy(() -> containerDynamoDAO.add(containerDTO))
                 .withCauseExactlyInstanceOf(ConditionalCheckFailedException.class);
-        Mockito.verify(clock).millis();
-        Mockito.verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        verify(clock).millis();
+        verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyAdd(containerDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
         Mockito.verifyNoMoreInteractions(clock);
-        Mockito.verifyZeroInteractions(objectMapper);
+        verifyZeroInteractions(objectMapper);
     }
 
     @Test
@@ -112,7 +118,7 @@ public class TestContainerDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
                 .isThrownBy(() -> containerDynamoDAO.add(null))
                 .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("containerdto cannot be null");
-        Mockito.verifyZeroInteractions(dynamoDBMapper,clock, objectMapper);
+        verifyZeroInteractions(dynamoDBMapper, clock, objectMapper);
 
 
     }
@@ -130,11 +136,11 @@ public class TestContainerDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(RetriableException.class)
                 .isThrownBy(() -> containerDynamoDAO.add(containerDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(clock).millis();
-        Mockito.verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        verify(clock).millis();
+        verify(dynamoDBMapper).save(containerArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyAdd(containerDTO);
-        Mockito.verifyNoMoreInteractions(dynamoDBMapper,clock);
-        Mockito.verifyZeroInteractions(objectMapper);
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper, clock);
+        verifyZeroInteractions(objectMapper);
     }
 
     @Test
@@ -142,7 +148,7 @@ public class TestContainerDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(NonRetriableException.class)
                 .isThrownBy(() -> containerDynamoDAO.getLastAddedContainer(null))
                 .withCauseExactlyInstanceOf(IllegalArgumentException.class);
-        Mockito.verifyZeroInteractions(dynamoDBMapper,clock, objectMapper);
+        verifyZeroInteractions(dynamoDBMapper, clock, objectMapper);
     }
 
     @Test
@@ -154,13 +160,13 @@ public class TestContainerDynamoDAOImpl {
         Container expectedEntity = containerDTO.toDbEntity();
         Mockito.when(paginatedQueryList.stream()).thenReturn(ImmutableList.of(expectedEntity).stream());
         Optional<ContainerDTO> lastAddedContainerOp = containerDynamoDAO.getLastAddedContainer(containerDTO.getWarehouseId());
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
-        Mockito.verify(paginatedQueryList).stream();
+        verify(dynamoDBMapper).query(eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
+        verify(paginatedQueryList).stream();
         new BooleanAssert(lastAddedContainerOp.isPresent()).isEqualTo(true);
         Assertions.assertThat(expectedEntity).usingRecursiveComparison().isEqualTo(lastAddedContainerOp.get());
         captorVerifyQueryForGetLastContainer(containerDTO);
-        Mockito.verifyNoMoreInteractions(dynamoDBMapper,paginatedQueryList);
-        Mockito.verifyZeroInteractions(objectMapper,clock);
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper, paginatedQueryList);
+        verifyZeroInteractions(objectMapper, clock);
 
 
     }
@@ -172,8 +178,8 @@ public class TestContainerDynamoDAOImpl {
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenReturn(paginatedQueryList);
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
         Optional<ContainerDTO> lastAddedContainerOp = containerDynamoDAO.getLastAddedContainer(containerDTO.getWarehouseId());
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
-        Mockito.verify(paginatedQueryList).stream();
+        verify(dynamoDBMapper).query(eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
+        verify(paginatedQueryList).stream();
         new BooleanAssert(lastAddedContainerOp.isPresent()).isEqualTo(false);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
         Mockito.verifyNoMoreInteractions(paginatedQueryList);
@@ -186,8 +192,8 @@ public class TestContainerDynamoDAOImpl {
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenThrow(new InternalServerErrorException("exception"));
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
         Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(() -> containerDynamoDAO.getLastAddedContainer(containerDTO.getWarehouseId())).withCauseExactlyInstanceOf(InternalServerErrorException.class);
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
-        Mockito.verifyZeroInteractions(paginatedQueryList);
+        verify(dynamoDBMapper).query(eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
+        verifyZeroInteractions(paginatedQueryList);
         captorVerifyQueryForGetLastContainer(containerDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
@@ -199,8 +205,8 @@ public class TestContainerDynamoDAOImpl {
         Mockito.when(dynamoDBMapper.query(Mockito.any(), Mockito.any(DynamoDBQueryExpression.class))).thenThrow(new RuntimeException("exception"));
         Mockito.when(paginatedQueryList.stream()).thenReturn(Collections.EMPTY_LIST.stream());
         Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(() -> containerDynamoDAO.getLastAddedContainer(containerDTO.getWarehouseId())).withCauseExactlyInstanceOf(RuntimeException.class);
-        Mockito.verify(dynamoDBMapper).query(Mockito.eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
-        Mockito.verifyZeroInteractions(paginatedQueryList);
+        verify(dynamoDBMapper).query(eq(Container.class), dynamoDBQueryExpressionCaptor.capture());
+        verifyZeroInteractions(paginatedQueryList);
         captorVerifyQueryForGetLastContainer(containerDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
     }
@@ -235,7 +241,39 @@ public class TestContainerDynamoDAOImpl {
         Assertions.assertThat(actualDdbQueryExpression).usingRecursiveComparison().isEqualTo(expectedDynamoDBQueryExpression);
     }
 
+    @Test
+    public void test_get_container_input_null() {
 
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> containerDynamoDAO.getContainer(null)).withMessageContaining("getContainerRequest cannot be null");
+        verifyZeroInteractions(dynamoDBMapper, objectMapper, clock);
+    }
 
+    @Test
+    public void test_get_container_exists_success() {
+
+        GetContainerRequest getContainerRequest = GetContainerRequest.builder().warehouseId(WAREHOUSE_1).containerId(CONTAINER_1).build();
+        Container container = Container.builder().containerId(getContainerRequest.getContainerId()).warehouseId(getContainerRequest.getWarehouseId()).skuCodeWisePredefinedCapacity(PREDEFINED_CAPACITY)
+                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).build();
+        Mockito.when(dynamoDBMapper.load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()))).thenReturn(container);
+        Optional<ContainerDTO> actualContainerDTOOp = containerDynamoDAO.getContainer(getContainerRequest);
+        ContainerDTO expectedContainerDTO = new ContainerDTO.Builder().containerDetails(container).build();
+        new BooleanAssert(actualContainerDTOOp.isPresent()).isEqualTo(true);
+        new ObjectAssert<>(actualContainerDTOOp.get()).usingRecursiveComparison().isEqualTo(expectedContainerDTO);
+        verify(dynamoDBMapper).load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()));
+        verifyZeroInteractions(objectMapper, clock);
+
+    }
+
+    @Test
+    public void test_get_container_not_exists_success() {
+        GetContainerRequest getContainerRequest = GetContainerRequest.builder().warehouseId(WAREHOUSE_1).containerId(CONTAINER_1).build();
+        Container container = Container.builder().containerId(getContainerRequest.getContainerId()).warehouseId(getContainerRequest.getWarehouseId()).skuCodeWisePredefinedCapacity(PREDEFINED_CAPACITY)
+                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).build();
+        Mockito.when(dynamoDBMapper.load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()))).thenReturn(null);
+        Optional<ContainerDTO> actualContainerDTOOp = containerDynamoDAO.getContainer(getContainerRequest);
+        new BooleanAssert(actualContainerDTOOp.isPresent()).isEqualTo(false);
+        verify(dynamoDBMapper).load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()));
+        verifyZeroInteractions(objectMapper, clock);
+    }
 }
 
