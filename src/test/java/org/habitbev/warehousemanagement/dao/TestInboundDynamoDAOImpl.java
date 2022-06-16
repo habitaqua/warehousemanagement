@@ -59,19 +59,18 @@ public class TestInboundDynamoDAOImpl {
     @Captor
     ArgumentCaptor<FinishedGoodsInbound> finishedGoodsInboundCaptor;
 
-    Clock clock;
+
 
 
     @Before
     public void setupClass() {
         MockitoAnnotations.initMocks(this);
-        clock = Clock.systemUTC();
         inboundDynamoDAO = new InboundDynamoDAOImpl(dynamoDBMapper);
     }
 
     @Test
     public void test_add_success() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
         inboundDynamoDAO.add(fgInboundDTO);
@@ -83,7 +82,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_add_already_existing() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
         Mockito.doThrow(new ConditionalCheckFailedException("Hashkey rannge key already exists")).when(dynamoDBMapper)
@@ -110,8 +109,8 @@ public class TestInboundDynamoDAOImpl {
     }
 
     @Test
-    public void test_add_input_status_null_non_retriable_exception() {
-        long startTime = clock.millis();
+    public void test_add_input_status_null_illegal_argument_exception() {
+        long startTime = EPOCH_MILLI;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
 
@@ -124,8 +123,8 @@ public class TestInboundDynamoDAOImpl {
     }
 
     @Test
-    public void test_add_input_starttime_null_non_retriable_exception() {
-        long startTime = clock.millis();
+    public void test_add_input_starttime_null_illegal_argument_exception() {
+        long startTime = EPOCH_MILLI;
 
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .modifiedTime(startTime).userId(USER_ID).build();
@@ -139,8 +138,8 @@ public class TestInboundDynamoDAOImpl {
     }
 
     @Test
-    public void test_add_input_userId_null_non_retriable_exception() {
-        long startTime = clock.millis();
+    public void test_add_input_userId_null_illegal_argument_exception() {
+        long startTime = EPOCH_MILLI;
 
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).build();
@@ -155,7 +154,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_add_throws_retriable_xception() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
         Mockito.doThrow(new InternalServerErrorException("internal server exception")).when(dynamoDBMapper)
@@ -164,6 +163,21 @@ public class TestInboundDynamoDAOImpl {
         Assertions.assertThatExceptionOfType(RetriableException.class)
                 .isThrownBy(() -> inboundDynamoDAO.add(fgInboundDTO))
                 .withCauseExactlyInstanceOf(InternalServerErrorException.class);
+        Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyAdd(fgInboundDTO);
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+    }
+    @Test
+    public void test_add_throws_non_retriable_xception() {
+        long startTime = EPOCH_MILLI;
+        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Active()).warehouseId(WAREHOUSE_1)
+                .startTime(startTime).modifiedTime(startTime).userId(USER_ID).build();
+        Mockito.doThrow(new RuntimeException("run time exception")).when(dynamoDBMapper)
+                .save(any(FinishedGoodsInbound.class), any(DynamoDBSaveExpression.class));
+
+        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+                .isThrownBy(() -> inboundDynamoDAO.add(fgInboundDTO))
+                .withCauseExactlyInstanceOf(RuntimeException.class);
         Mockito.verify(dynamoDBMapper).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
         captorVerifyAdd(fgInboundDTO);
         Mockito.verifyNoMoreInteractions(dynamoDBMapper);
@@ -179,7 +193,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_update_success() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -192,7 +206,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_partial_update_success() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).warehouseId(WAREHOUSE_1)
                 .modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -237,6 +251,21 @@ public class TestInboundDynamoDAOImpl {
     }
 
     @Test
+    public void test_update_runtime_exception() {
+        FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
+                .userId(USER_ID).build();
+        Mockito.doThrow(new RuntimeException("exception")).when(dynamoDBMapper)
+                .save(any(FinishedGoodsInbound.class), any(DynamoDBSaveExpression.class));
+
+        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+                .isThrownBy(() -> inboundDynamoDAO.update(fgInboundDTO))
+                .withCauseExactlyInstanceOf(RuntimeException.class);
+        Mockito.verify(dynamoDBMapper, Mockito.times(1)).save(finishedGoodsInboundCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());
+        captorVerifyUpdate(fgInboundDTO);
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+
+    }
+    @Test
     public void test_get_last_inbound_input_null() {
         Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> inboundDynamoDAO.getLastInbound(null));
@@ -245,7 +274,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_get_last_inbound_success() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -266,7 +295,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_get_last_inbound_none_success() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -282,7 +311,7 @@ public class TestInboundDynamoDAOImpl {
     }
     @Test
     public void test_get_last_inbound_internal_server_exception() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -297,7 +326,7 @@ public class TestInboundDynamoDAOImpl {
 
     @Test
     public void test_get_last_inbound_exception() {
-        long startTime = clock.millis();
+        long startTime = EPOCH_MILLI;
         long modifiedTime = startTime + 10;
         FGInboundDTO fgInboundDTO = FGInboundDTO.builder().inboundId(INBOUND_1).status(new Closed()).warehouseId(WAREHOUSE_1)
                 .startTime(startTime).modifiedTime(modifiedTime).endTime(modifiedTime).userId(USER_ID).build();
@@ -370,7 +399,6 @@ public class TestInboundDynamoDAOImpl {
         new BooleanAssert(finishedGoodsInboundOp.isPresent()).isEqualTo(true);
         new ObjectAssert<>(finishedGoodsInboundOp.get()).usingRecursiveComparison().isEqualTo(expectedFinishedGoodsInbound);
         verify(dynamoDBMapper).load(any(), eq(WAREHOUSE_1),eq(INBOUND_1));
-        verifyZeroInteractions(clock);
         verifyNoMoreInteractions(dynamoDBMapper);
     }
 
@@ -381,9 +409,26 @@ public class TestInboundDynamoDAOImpl {
         Optional<FinishedGoodsInbound> finishedGoodsInboundOp = inboundDynamoDAO.get(WAREHOUSE_1, INBOUND_1);
         new BooleanAssert(finishedGoodsInboundOp.isPresent()).isEqualTo(false);
         verify(dynamoDBMapper).load(any(), eq(WAREHOUSE_1),eq(INBOUND_1));
-        verifyZeroInteractions(clock);
         verifyNoMoreInteractions(dynamoDBMapper);
 
+    }
+
+    @Test
+    public void test_get_inbound_internal_server_exception() {
+
+        when(dynamoDBMapper.load(any(), eq(WAREHOUSE_1),eq(INBOUND_1))).thenThrow(new InternalServerErrorException("exception"));
+        Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(()->inboundDynamoDAO.get(WAREHOUSE_1, INBOUND_1)).withCauseExactlyInstanceOf(InternalServerErrorException.class);
+        verify(dynamoDBMapper).load(any(), eq(WAREHOUSE_1),eq(INBOUND_1));
+        verifyNoMoreInteractions(dynamoDBMapper);
+    }
+
+    @Test
+    public void test_get_inbound_run_time_exception() {
+
+        when(dynamoDBMapper.load(any(), eq(WAREHOUSE_1),eq(INBOUND_1))).thenThrow(new RuntimeException("exception"));
+        Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(()->inboundDynamoDAO.get(WAREHOUSE_1, INBOUND_1)).withCauseExactlyInstanceOf(RuntimeException.class);
+        verify(dynamoDBMapper).load(any(), eq(WAREHOUSE_1),eq(INBOUND_1));
+        verifyNoMoreInteractions(dynamoDBMapper);
     }
 }
 

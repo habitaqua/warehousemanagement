@@ -40,6 +40,9 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while fetching inbound", e);
             throw new RetriableException(e);
+        } catch (Exception e){
+            log.error("non retriable Error occured while fetching inbound", e);
+            throw new NonRetriableException(e);
         }
     }
 
