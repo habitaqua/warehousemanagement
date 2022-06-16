@@ -31,13 +31,12 @@ public class InboundDynamoDAOImpl implements InboundDAO {
 
     @Override
     public Optional<FinishedGoodsInbound> get(String warehouseId, String inboundId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank or null");
+
         try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
-            Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank or null");
             FinishedGoodsInbound finishedGoodsInbound = inboundDynamoDbMapper.load(FinishedGoodsInbound.class, warehouseId, inboundId);
             return Optional.ofNullable(finishedGoodsInbound);
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while fetching inbound", e);
             throw new RetriableException(e);
@@ -50,12 +49,12 @@ public class InboundDynamoDAOImpl implements InboundDAO {
      * @param fgInboundDTO
      */
     public void add(FGInboundDTO fgInboundDTO) {
-        try {
-            Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
-            Preconditions.checkArgument(fgInboundDTO.getStatus() != null, "fgInboundDTO.status cannot be null");
-            Preconditions.checkArgument(fgInboundDTO.getStartTime() != null, "fgInboundDTO.startTime cannot be null");
-            Preconditions.checkArgument(StringUtils.isNotBlank(fgInboundDTO.getUserId()), "fgInboundDTO.userId cannot be blank or null");
+        Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
+        Preconditions.checkArgument(fgInboundDTO.getStatus() != null, "fgInboundDTO.status cannot be null");
+        Preconditions.checkArgument(fgInboundDTO.getStartTime() != null, "fgInboundDTO.startTime cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(fgInboundDTO.getUserId()), "fgInboundDTO.userId cannot be blank or null");
 
+        try {
 
             FinishedGoodsInbound finishedGoodsInbound = fgInboundDTO.toDbEntity();
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
@@ -71,8 +70,6 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             log.error("Inbound", fgInboundDTO.getInboundId(), " already exist in given warehouse",
                     fgInboundDTO.getWarehouseId(), ce);
             throw new ResourceAlreadyExistsException(ce);
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (Exception e) {
             log.error("Non Retriable Error occured while starting inbound", e);
             throw new NonRetriableException(e);
@@ -80,8 +77,9 @@ public class InboundDynamoDAOImpl implements InboundDAO {
     }
 
     public void update(FGInboundDTO fgInboundDTO) {
+        Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
+
         try {
-            Preconditions.checkArgument(fgInboundDTO != null, "fgInboundDTO cannot be null");
             InboundStatus newInboundStatus = fgInboundDTO.getStatus();
 
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
@@ -98,8 +96,6 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             inboundDynamoDbMapper.save(fgInboundDTO.toDbEntity(), dynamoDBSaveExpression);
 
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException ie) {
             log.error("Retriable Error occured while updating inbound", ie);
             throw new RetriableException(ie);
@@ -119,8 +115,9 @@ public class InboundDynamoDAOImpl implements InboundDAO {
      * @return
      */
     public Optional<FinishedGoodsInbound> getLastInbound(String warehouseId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
+
         try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
 
             Map<String, AttributeValue> eav = new HashMap();
             eav.put(":val1", new AttributeValue().withS(warehouseId));
@@ -134,9 +131,7 @@ public class InboundDynamoDAOImpl implements InboundDAO {
             } else {
                 return Optional.empty();
             }
-        } catch (IllegalArgumentException e) {
-            throw e;
-        } catch (InternalServerErrorException e) {
+        }catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while getting last inbound", e);
             throw new RetriableException(e);
         } catch (Exception e) {
@@ -145,15 +140,4 @@ public class InboundDynamoDAOImpl implements InboundDAO {
         }
     }
 
-    private String getAppendedStatusString(InboundStatus inboundStatus, Map<String, AttributeValue> updatedAttributes) {
-        List<String> previousValues = new ArrayList<>();
-        for (int i = 0; i < inboundStatus.previousStates().size(); i++) {
-            String key = ":is" + (i + 1);
-            updatedAttributes.put(key,
-                    new AttributeValue().withS(inboundStatus.previousStates().get(i).toString()));
-            previousValues.add(key);
-        }
-        String previousStatus = String.join(", ", previousValues);
-        return previousStatus;
-    }
 }

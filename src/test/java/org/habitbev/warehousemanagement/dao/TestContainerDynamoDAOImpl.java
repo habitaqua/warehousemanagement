@@ -267,11 +267,26 @@ public class TestContainerDynamoDAOImpl {
     @Test
     public void test_get_container_not_exists_success() {
         GetContainerRequest getContainerRequest = GetContainerRequest.builder().warehouseId(WAREHOUSE_1).containerId(CONTAINER_1).build();
-        Container container = Container.builder().containerId(getContainerRequest.getContainerId()).warehouseId(getContainerRequest.getWarehouseId()).skuCodeWisePredefinedCapacity(PREDEFINED_CAPACITY)
-                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).build();
         Mockito.when(dynamoDBMapper.load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()))).thenReturn(null);
         Optional<ContainerDTO> actualContainerDTOOp = containerDynamoDAO.getContainer(getContainerRequest);
         new BooleanAssert(actualContainerDTOOp.isPresent()).isEqualTo(false);
+        verify(dynamoDBMapper).load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()));
+        verifyZeroInteractions(objectMapper, clock);
+    }
+    @Test
+    public void test_get_internal_server_exception() {
+        GetContainerRequest getContainerRequest = GetContainerRequest.builder().warehouseId(WAREHOUSE_1).containerId(CONTAINER_1).build();
+        Mockito.when(dynamoDBMapper.load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()))).thenThrow(new InternalServerErrorException("runtime exception"));
+        Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(()->containerDynamoDAO.getContainer(getContainerRequest)).withCauseExactlyInstanceOf(InternalServerErrorException.class);
+        verify(dynamoDBMapper).load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()));
+        verifyZeroInteractions(objectMapper, clock);
+    }
+
+    @Test
+    public void test_get_runtime_exception() {
+        GetContainerRequest getContainerRequest = GetContainerRequest.builder().warehouseId(WAREHOUSE_1).containerId(CONTAINER_1).build();
+        Mockito.when(dynamoDBMapper.load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()))).thenThrow(new RuntimeException("runtime exception"));
+        Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(()->containerDynamoDAO.getContainer(getContainerRequest)).withCauseExactlyInstanceOf(RuntimeException.class);
         verify(dynamoDBMapper).load(Mockito.any(), eq(getContainerRequest.getWarehouseId()), eq(getContainerRequest.getContainerId()));
         verifyZeroInteractions(objectMapper, clock);
     }
