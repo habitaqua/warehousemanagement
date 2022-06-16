@@ -113,7 +113,8 @@ public class InventoryService {
         List<String> uniqueProductIdsToOutbound = outboundReq.getUniqueProductIds();
         WarehouseActionValidationRequest warehouseActionValidationRequest = WarehouseActionValidationRequest.builder().warehouseAction(INVENTORY_OUTBOUND)
                 .outboundId(outboundReq.getOutboundId()).capacityToOutbound(uniqueProductIdsToOutbound.size()).orderId(outboundReq.getOrderId())
-                .companyId(outboundReq.getCompanyId()).containerId(outboundReq.getContainerId()).skuCode(outboundReq.getSkuCode()).build();
+                .warehouseId(outboundReq.getWarehouseId()).companyId(outboundReq.getCompanyId()).containerId(outboundReq.getContainerId())
+                .skuCode(outboundReq.getSkuCode()).build();
         WarehouseValidatedEntities warehouseValidatedEntities = warehouseActionValidatorChain.execute(warehouseActionValidationRequest);
         ContainerDTO validatedContainerDTO = warehouseValidatedEntities.getContainerDTO();
         String containerId = validatedContainerDTO.getContainerId();
