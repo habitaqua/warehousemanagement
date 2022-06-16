@@ -47,7 +47,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
 
     @Inject
     public InventoryDynamoDAOImpl(AmazonDynamoDB amazonDynamoDBClient, DynamoDBMapper inventoryDynamoDbMapper,
-                                  ContainerStatusDeterminer containerStatusDeterminer, @Named("dynamoDbImpl")ContainerCapacityDAO containerCapacityDAO,
+                                  ContainerStatusDeterminer containerStatusDeterminer, @Named("dynamoDbImpl") ContainerCapacityDAO containerCapacityDAO,
                                   Clock clock) {
         this.amazonDynamoDBClient = amazonDynamoDBClient;
         this.inventoryDynamoDbMapper = inventoryDynamoDbMapper;
@@ -136,9 +136,9 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
                 amazonDynamoDBClient.transactWriteItems(inboundInventoryTransaction);
             }
         } catch (TransactionCanceledException tce) {
-            List<CancellationReason> cancellationReasons = tce.getCancellationReasons();
+            List<String> cancellationsReasons = tce.getCancellationReasons().stream().map(cr -> cr.toString()).collect(toList());
             log.error("transaction cancelled exception for inbounding ", inboundRequest.getInboundId(), " with cancellation reasons ",
-                    StringUtils.join(cancellationReasons, COMMA));
+                    StringUtils.join(cancellationsReasons, COMMA));
             String message = String.format("Inconsistent state occurred in data layer, either of the following is true \n" +
                             "1) Container %s reached its capacity \n" +
                             "2) ProductIds are never generated \n" +
@@ -161,7 +161,7 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
      */
     public void outbound(InventoryOutboundRequestDTO outboundRequest) {
         try {
-            Preconditions.checkArgument(outboundRequest!= null, "outboundRequest cannot be null");
+            Preconditions.checkArgument(outboundRequest != null, "outboundRequest cannot be null");
             List<String> uniqueProductIds = outboundRequest.getUniqueProductIds();
             Preconditions.checkArgument(outboundRequest != null, "outboundRequest cannot be null");
             String containerId = outboundRequest.getContainerId();
@@ -337,7 +337,6 @@ public class InventoryDynamoDAOImpl implements InventoryDAO {
         updatedAttributes.put(":modified_time", new AttributeValue().withN(String.valueOf(currentTime)));
         updatedAttributes.put(":existing_container_id", new AttributeValue(sourceContainerId));
         updatedAttributes.put(":warehouse_id", new AttributeValue(moveInventoryRequest.getWarehouseId()));
-
 
 
         Update update = new Update().withTableName(INVENTORY_TABLE_NAME).withKey(inventoryKey)
