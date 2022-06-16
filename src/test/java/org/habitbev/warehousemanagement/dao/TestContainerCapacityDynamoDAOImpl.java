@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBSaveExpression;
 import com.amazonaws.services.dynamodbv2.model.*;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.BooleanAssert;
+import org.assertj.core.api.IntegerAssert;
 import org.habitbev.warehousemanagement.entities.container.containerstatus.Available;
 import org.habitbev.warehousemanagement.entities.exceptions.NonRetriableException;
 import org.habitbev.warehousemanagement.entities.exceptions.RetriableException;
@@ -71,22 +72,70 @@ public class TestContainerCapacityDynamoDAOImpl {
         Mockito.verifyZeroInteractions(clock);
     }
 
+
     @Test
-    public void test_get_input_warehouseId_null_non_retriable_exception() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+    public void test_get_internal_server_exception() {
+        String hashKey = String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1);
+        Mockito.when(dynamoDBMapper.load(ContainerCapacity.class, hashKey)).thenThrow(new InternalServerErrorException("internal server exception"));
+        Assertions.assertThatExceptionOfType(RetriableException.class).isThrownBy(() -> containerCapacityDynamoDAO.get(WAREHOUSE_1, CONTAINER_1)).withCauseExactlyInstanceOf(InternalServerErrorException.class);
+        Mockito.verify(dynamoDBMapper).load(Mockito.any(), Mockito.eq(hashKey));
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+        Mockito.verifyZeroInteractions(clock);
+    }
+
+    @Test
+    public void test_get_run_time_exception() {
+        String hashKey = String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1);
+        Mockito.when(dynamoDBMapper.load(ContainerCapacity.class, hashKey)).thenThrow(new RuntimeException("internal server exception"));
+        Assertions.assertThatExceptionOfType(NonRetriableException.class).isThrownBy(() -> containerCapacityDynamoDAO.get(WAREHOUSE_1, CONTAINER_1)).withCauseExactlyInstanceOf(RuntimeException.class);
+        Mockito.verify(dynamoDBMapper).load(Mockito.any(), Mockito.eq(hashKey));
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+        Mockito.verifyZeroInteractions(clock);
+    }
+
+    @Test
+    public void test_get_input_warehouseId_null_illegal_argument_exception() {
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> containerCapacityDynamoDAO.get(null, CONTAINER_1))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("warehouseId cannot be blank or null");
+                .withMessageContaining("warehouseId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper, clock);
     }
 
 
     @Test
-    public void test_get_input_containerId_null_non_retriable_exception() {
-        Assertions.assertThatExceptionOfType(NonRetriableException.class)
+    public void test_get_input_containerId_null_illegal_argument_exception() {
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> containerCapacityDynamoDAO.get(WAREHOUSE_1, null))
-                .withCauseExactlyInstanceOf(IllegalArgumentException.class).withMessageContaining("containerId cannot be blank or null");
+                .withMessageContaining("containerId cannot be blank or null");
         Mockito.verifyZeroInteractions(dynamoDBMapper, clock);
     }
+
+    @Test
+    public void test_get_existing_quantity_entity_present_success() {
+        String hashKey = String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1);
+
+        ContainerCapacity expectedEntity = ContainerCapacity.builder().warehouseContainerId(hashKey).currentCapacity(0)
+                .creationTime(TIME_NOW).modifiedTime(TIME_NOW).containerStatus(new Available()).build();
+        Mockito.when(dynamoDBMapper.load(ContainerCapacity.class, hashKey)).thenReturn(expectedEntity);
+        int existingQuantity = containerCapacityDynamoDAO.getExistingQuantity(WAREHOUSE_1, CONTAINER_1);
+        new IntegerAssert(existingQuantity).isEqualTo(expectedEntity.getCurrentCapacity());
+        Mockito.verify(dynamoDBMapper).load(Mockito.any(), Mockito.eq(hashKey));
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+        Mockito.verifyZeroInteractions(clock);
+    }
+
+    @Test
+    public void test_get_existing_quantity_entity_not_present_success() {
+        String hashKey = String.join(DELIMITER, WAREHOUSE_1, CONTAINER_1);
+        Mockito.when(dynamoDBMapper.load(ContainerCapacity.class, hashKey)).thenReturn(null);
+        int existingQuantity = containerCapacityDynamoDAO.getExistingQuantity(WAREHOUSE_1, CONTAINER_1);
+        new IntegerAssert(existingQuantity).isEqualTo(0);
+        Mockito.verify(dynamoDBMapper).load(Mockito.any(), Mockito.eq(hashKey));
+        Mockito.verifyNoMoreInteractions(dynamoDBMapper);
+        Mockito.verifyZeroInteractions(clock);
+    }
+
+
     @Test
     public void test_init_success() {
         containerCapacityDynamoDAO.init(WAREHOUSE_1, CONTAINER_1);
@@ -103,7 +152,7 @@ public class TestContainerCapacityDynamoDAOImpl {
                 .save(Mockito.any(ContainerCapacity.class), Mockito.any(DynamoDBSaveExpression.class));
 
         Assertions.assertThatExceptionOfType(ResourceAlreadyExistsException.class)
-                .isThrownBy(() -> containerCapacityDynamoDAO.init(WAREHOUSE_1,CONTAINER_1))
+                .isThrownBy(() -> containerCapacityDynamoDAO.init(WAREHOUSE_1, CONTAINER_1))
                 .withCauseExactlyInstanceOf(ConditionalCheckFailedException.class);
         Mockito.verify(clock).millis();
         Mockito.verify(dynamoDBMapper).save(containerCapacityArgumentCaptor.capture(), dynamoDBSaveExpressionCaptor.capture());

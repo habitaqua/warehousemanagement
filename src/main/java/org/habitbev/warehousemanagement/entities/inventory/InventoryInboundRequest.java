@@ -2,8 +2,7 @@ package org.habitbev.warehousemanagement.entities.inventory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
-import lombok.Builder;
-import lombok.Value;
+import lombok.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.habitbev.warehousemanagement.entities.inventory.inventorystatus.InventoryStatus;
@@ -14,7 +13,10 @@ import java.util.List;
  * @author moduludu
  * Adding of inventory at a bulk level. Happens against a containerId.
  */
-@Value
+@Getter
+@Setter(AccessLevel.PRIVATE)
+@ToString
+@NoArgsConstructor
 public class InventoryInboundRequest {
 
     @JsonProperty("uniqueProductIds")

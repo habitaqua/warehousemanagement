@@ -40,6 +40,8 @@ public class ContainerCapacityDynamoDAOImpl implements ContainerCapacityDAO {
             String hashKey = String.join(DELIMITER, warehouseId, containerId);
             ContainerCapacity containerCapacity = containerCapacityDynamoDbMapper.load(ContainerCapacity.class, hashKey);
             return Optional.ofNullable(containerCapacity);
+        } catch (IllegalArgumentException e) {
+            throw (e);
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while getting last inbound", e);
             throw new RetriableException(e);
