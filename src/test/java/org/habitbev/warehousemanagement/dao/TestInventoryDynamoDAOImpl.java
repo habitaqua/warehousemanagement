@@ -266,7 +266,9 @@ public class TestInventoryDynamoDAOImpl {
         when(containerCapacityDAO.getExistingQuantity(eq(inboundRequest.getWarehouseId()), eq(inboundRequest.getContainerId()))).thenReturn(assumedExistingCapacity);
         int newCapacity = assumedExistingCapacity+inboundRequest.getUniqueProductIds().size();
         when(containerStatusDeterminer.determineStatus(eq(newCapacity), eq(inboundRequest.getContainerMaxCapacity()))).thenReturn(new PartiallyFilled());
-        when(amazonDynamoDBClient.transactWriteItems(transactWriteItemsRequestArgumentCaptor.capture())).thenThrow(new TransactionCanceledException("transaction cancelled"));
+        TransactionCanceledException transactionCanceledException = new TransactionCanceledException("exception");
+        transactionCanceledException.setCancellationReasons(ImmutableList.of());
+        when(amazonDynamoDBClient.transactWriteItems(transactWriteItemsRequestArgumentCaptor.capture())).thenThrow(transactionCanceledException);
         TransactWriteItemsRequest expectedTransactWriteItemsRequest = getExpectedTransactWriteItemsRequest(inboundRequest, assumedExistingCapacity, newCapacity);
         Assertions.assertThatExceptionOfType(InconsistentStateException.class).isThrownBy(()->inventoryDynamoDAO.inbound(inboundRequest))
                 .withCauseExactlyInstanceOf(TransactionCanceledException.class);

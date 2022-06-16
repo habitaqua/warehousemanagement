@@ -36,28 +36,28 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
 
     @Override
     public Optional<FinishedGoodsOutbound> get(String warehouseId, String outboundId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank or null");
+
         try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank or null");
-            Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank or null");
             FinishedGoodsOutbound finishedGoodsOutbound = outboundDynamoDbMapper.load(FinishedGoodsOutbound.class, warehouseId, outboundId);
             return Optional.ofNullable(finishedGoodsOutbound);
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while fetching inbound", e);
             throw new RetriableException(e);
+        } catch (Exception e) {
+            log.error("Non Error occured while fetching inbound", e);
+            throw new NonRetriableException(e);
         }
     }
 
     public void add(OutboundDTO outboundDTO) {
+        Preconditions.checkArgument(outboundDTO != null, "outboundDTO cannot be null");
+        Preconditions.checkArgument(outboundDTO.getStatus() != null, "outboundDTO.status cannot be null");
+        Preconditions.checkArgument(outboundDTO.getStartTime() != null, "outboundDTO.startTime cannot be null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(outboundDTO.getUserId()), "outboundDTO.userId cannot be blank or null");
+        Preconditions.checkArgument(StringUtils.isNotBlank(outboundDTO.getCustomerId()), "outboundDTO.customerId cannot be blank or null");
         try {
-            Preconditions.checkArgument(outboundDTO != null, "outboundDTO cannot be null");
-            Preconditions.checkArgument(outboundDTO.getStatus() != null, "outboundDTO.status cannot be null");
-            Preconditions.checkArgument(outboundDTO.getStartTime() != null, "outboundDTO.startTime cannot be null");
-            Preconditions.checkArgument(StringUtils.isNotBlank(outboundDTO.getUserId()), "outboundDTO.userId cannot be blank or null");
-            Preconditions.checkArgument(StringUtils.isNotBlank(outboundDTO.getCustomerId()), "outboundDTO.customerId cannot be blank or null");
-
-
             FinishedGoodsOutbound finishedGoodsOutbound = outboundDTO.toDbEntity();
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
             Map expected = new HashMap();
@@ -65,8 +65,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             expected.put("outboundId", new ExpectedAttributeValue().withExists(false));
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             outboundDynamoDbMapper.save(finishedGoodsOutbound, dynamoDBSaveExpression);
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occurred while starting inbound", e);
             throw new RetriableException(e);
@@ -81,8 +79,9 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
     }
 
     public void update(OutboundDTO outboundDTO) {
+        Preconditions.checkArgument(outboundDTO != null, "fgInboundDTO cannot be null");
+
         try {
-            Preconditions.checkArgument(outboundDTO != null, "fgInboundDTO cannot be null");
             OutboundStatus newOutboundStatus = outboundDTO.getStatus();
 
             DynamoDBSaveExpression dynamoDBSaveExpression = new DynamoDBSaveExpression();
@@ -99,8 +98,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             dynamoDBSaveExpression.withExpected(expected).withConditionalOperator(ConditionalOperator.AND);
             outboundDynamoDbMapper.save(outboundDTO.toDbEntity(), dynamoDBSaveExpression);
 
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException ie) {
             log.error("Retriable Error occured while updating inbound", ie);
             throw new RetriableException(ie);
@@ -114,8 +111,9 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
     }
 
     public Optional<FinishedGoodsOutbound> getLastOutbound(String warehouseId) {
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
+
         try {
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be empty");
             Map<String, AttributeValue> eav = new HashMap();
             eav.put(":val1", new AttributeValue().withS(warehouseId));
             DynamoDBQueryExpression<FinishedGoodsOutbound> dynamoDBQueryExpression = new DynamoDBQueryExpression<FinishedGoodsOutbound>()
@@ -128,8 +126,6 @@ public class OutboundDynamoDAOImpl implements OutboundDAO {
             } else {
                 return Optional.empty();
             }
-        } catch (IllegalArgumentException e) {
-            throw e;
         } catch (InternalServerErrorException e) {
             log.error("Retriable Error occured while getting last inbound", e);
             throw new RetriableException(e);
