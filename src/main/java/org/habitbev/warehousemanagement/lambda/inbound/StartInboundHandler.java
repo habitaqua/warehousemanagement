@@ -48,10 +48,11 @@ public class StartInboundHandler implements RequestHandler<Map<String, Object>, 
                     .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
-            log.error("Exception occurred while adding location", e);
+            log.error("Exception occurred while inbounding", e);
+            String causeMessage = e.getCause()!=null?e.getCause().getMessage(): "";
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
-                    .withBody(e.getMessage())
+                    .withBody(e.getMessage()+causeMessage)
                     .withIsBase64Encoded(false);
         }
     }

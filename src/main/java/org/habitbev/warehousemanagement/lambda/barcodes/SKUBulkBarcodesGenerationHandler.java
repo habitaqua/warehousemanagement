@@ -50,10 +50,11 @@ public class SKUBulkBarcodesGenerationHandler implements RequestHandler<Map<Stri
                     .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
-            log.error("Exception occurred while creating barcodes", e);
+            log.error("Exception occurred while inbounding", e);
+            String causeMessage = e.getCause()!=null?e.getCause().getMessage(): "";
             return new APIGatewayProxyResponseEvent()
-                    .withBody(e.getMessage())
                     .withStatusCode(500)
+                    .withBody(e.getMessage()+causeMessage)
                     .withIsBase64Encoded(false);
         }
     }

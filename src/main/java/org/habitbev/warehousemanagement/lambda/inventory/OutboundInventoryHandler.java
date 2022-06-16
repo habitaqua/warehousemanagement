@@ -16,6 +16,7 @@ import java.util.Map;
 @Slf4j
 public class OutboundInventoryHandler implements RequestHandler<Map<String, Object>, APIGatewayProxyResponseEvent> {
 
+
     private InventoryService inventoryService;
     private ObjectMapper objectMapper;
 
@@ -45,10 +46,11 @@ public class OutboundInventoryHandler implements RequestHandler<Map<String, Obje
                     .withBody(e.getMessage())
                     .withIsBase64Encoded(false);
         } catch (Exception e) {
-            log.error("Exception occurred while adding location", e);
+            log.error("Exception occurred while inbounding", e);
+            String causeMessage = e.getCause()!=null?e.getCause().getMessage(): "";
             return new APIGatewayProxyResponseEvent()
                     .withStatusCode(500)
-                    .withBody(e.getCause().getMessage())
+                    .withBody(e.getMessage()+causeMessage)
                     .withIsBase64Encoded(false);
         }
     }
