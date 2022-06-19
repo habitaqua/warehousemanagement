@@ -20,7 +20,7 @@ public class Test {
     public static void main(String[] args)  {
 
 
-        for (int i = 41; i < 41 + 80; i++) {
+        for (int i = 21; i < 41; i++) {
             String incremental_number = StringUtils.leftPad(String.valueOf(i), PAD_SIZE, PAD_CHAR);
             System.out.println("\"BL500MLW-1655224251790-" + incremental_number+"\",");
         }

@@ -7,6 +7,7 @@ import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
 import org.habitbev.warehousemanagement.entities.company.CompanyDTO;
 import org.habitbev.warehousemanagement.entities.dynamodb.FinishedGoodsInbound;
 import org.habitbev.warehousemanagement.entities.exceptions.ResourceNotAvailableException;
+import org.habitbev.warehousemanagement.entities.exceptions.WarehouseActionValidationException;
 import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
 import org.habitbev.warehousemanagement.service.CompanyService;
 
@@ -25,15 +26,14 @@ public class CompanyIdValidator implements WarehouseActionEntitiesValidator {
     @Override
     public WarehouseValidatedEntities.Builder validate(WarehouseActionValidationRequest input, WarehouseValidatedEntities.Builder gatheredWarehouseEntities) {
         Preconditions.checkArgument(input != null, "input cannot be null");
-        Preconditions.checkArgument(gatheredWarehouseEntities != null, "gatherredWarehouseEntities cannot be null");
-
+        Preconditions.checkArgument(gatheredWarehouseEntities != null, "gatheredWarehouseEntities cannot be null");
         String companyId = input.getCompanyId();
         Preconditions.checkArgument(StringUtils.isNotBlank(companyId), "companyId cannot be blank");
-        Optional<CompanyDTO> companyDTO = companyService.getCompany(companyId);
-        if (!companyDTO.isPresent()) {
-            String message = String.format("companyId %s  does not exist", companyId);
-            throw new ResourceNotAvailableException(message);
+        try {
+            CompanyDTO companyDTO = companyService.getCompany(companyId);
+            return gatheredWarehouseEntities.companyDTO(companyDTO);
+        } catch (ResourceNotAvailableException e) {
+            throw new WarehouseActionValidationException(e);
         }
-        return gatheredWarehouseEntities.companyDTO(companyDTO.get());
     }
 }

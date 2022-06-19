@@ -23,16 +23,17 @@ public class ContainerForInboundValidator implements WarehouseActionEntitiesVali
 
     @Override
     public WarehouseValidatedEntities.Builder validate(WarehouseActionValidationRequest input, WarehouseValidatedEntities.Builder warehouseEntityBuilder) {
+        Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
+        Preconditions.checkArgument(warehouseEntityBuilder != null, "warehouseEntityBuilder cannot be null");
+        String containerId = input.getContainerId();
+        String warehouseId = input.getWarehouseId();
+        Integer capacityToInbound = input.getCapacityToInbound();
+        String skuCode = input.getSkuCode();
+        Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
+        Preconditions.checkArgument(capacityToInbound != null && capacityToInbound >= 0, "capacityToInbound cannot be < 0 or null");
         try {
-            Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
-            String containerId = input.getContainerId();
-            String warehouseId = input.getWarehouseId();
-            Integer capacityToInbound = input.getCapacityToInbound();
-            String skuCode = input.getSkuCode();
-            Preconditions.checkArgument(StringUtils.isNotBlank(containerId), "containerid cannot be blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(skuCode), "skuCode cannot be blank");
-            Preconditions.checkArgument(capacityToInbound != null && capacityToInbound >= 0, "capacityToInbound cannot be < 0 or null");
 
             ContainerDTO containerDTO = containerService.getContainer(GetContainerRequest.builder().containerId(containerId)
                     .warehouseId(warehouseId).build());
@@ -46,7 +47,7 @@ public class ContainerForInboundValidator implements WarehouseActionEntitiesVali
             }
             return warehouseEntityBuilder.containerDTO(containerDTO);
         } catch (IllegalArgumentException | ResourceNotAvailableException | InconsistentStateException e) {
-            throw new WarehouseActionValidationException(e.getCause());
+            throw new WarehouseActionValidationException(e);
         }
 
     }

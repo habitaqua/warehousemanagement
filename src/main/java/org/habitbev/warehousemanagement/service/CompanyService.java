@@ -23,7 +23,12 @@ public class CompanyService {
     }
 
 
-    public Optional<CompanyDTO> getCompany(String companyId) {
-        return companyDAO.getCompany(companyId);
+    public CompanyDTO getCompany(String companyId) {
+        Optional<CompanyDTO> companyDTO = companyDAO.getCompany(companyId);
+        if (!companyDTO.isPresent()) {
+            String message = String.format("companyId %s  does not exist", companyId);
+            throw new ResourceNotAvailableException(message);
+        }
+        return companyDTO.get();
     }
 }

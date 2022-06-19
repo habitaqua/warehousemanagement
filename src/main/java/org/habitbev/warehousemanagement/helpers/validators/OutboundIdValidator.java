@@ -29,12 +29,15 @@ public class OutboundIdValidator implements WarehouseActionEntitiesValidator {
 
     @Override
     public WarehouseValidatedEntities.Builder validate(WarehouseActionValidationRequest input, WarehouseValidatedEntities.Builder warehouseEntityBuilder) {
+
+        Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
+        Preconditions.checkArgument(warehouseEntityBuilder != null, "gatheredWarehouseEntities cannot be null");
+
+        String outboundId = input.getOutboundId();
+        String warehouseId = input.getWarehouseId();
+        Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         try {
-            Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
-            String outboundId = input.getOutboundId();
-            String warehouseId = input.getWarehouseId();
-            Preconditions.checkArgument(StringUtils.isNotBlank(outboundId), "outboundId cannot be blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
             Optional<FinishedGoodsOutbound> finishedGoodsOutboundOp = outboundDAO.get(warehouseId, outboundId);
             if (!finishedGoodsOutboundOp.isPresent()) {
                 String message = String.format("OutboundId %s in warehouseid %s does not exist", outboundId, warehouseId);

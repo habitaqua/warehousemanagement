@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import lombok.Builder;
 import org.habitbev.warehousemanagement.entities.WarehouseValidatedEntities;
+import org.habitbev.warehousemanagement.entities.exceptions.WarehouseActionValidationException;
 import org.habitbev.warehousemanagement.entities.inventory.WarehouseActionValidationRequest;
 
 import java.util.ArrayList;
@@ -37,8 +38,8 @@ public class WarehouseActionValidatorChain {
         Preconditions.checkArgument(inventoryOutboundValidators != null, "inventoryOutboundValidators not initialised");
         Preconditions.checkArgument(startInboundValidators != null, "startInboundValidators not initialised");
         Preconditions.checkArgument(endInboundValidators != null, "endInboundValidators not initialised");
-        Preconditions.checkArgument(startOutboundValidators != null, "startInboundValidators not initialised");
-        Preconditions.checkArgument(endOutboundValidators != null, "endInboundValidators not initialised");
+        Preconditions.checkArgument(startOutboundValidators != null, "startOutboundValidators not initialised");
+        Preconditions.checkArgument(endOutboundValidators != null, "endOutboundValidators not initialised");
         Preconditions.checkArgument(skuBarcodesGenerationValidators != null, "skuBarcodesGenerationValidators not initialised");
 
         this.inventoryInboundValidators = inventoryInboundValidators;
@@ -76,6 +77,8 @@ public class WarehouseActionValidatorChain {
             case SKU_BARCODE_GENERATION:
                 validators = skuBarcodesGenerationValidators;
                 break;
+            default:
+                throw new WarehouseActionValidationException("Warehouse Action not configured");
         }
         WarehouseValidatedEntities.Builder warehouseEntitiesBuilder = new WarehouseValidatedEntities.Builder();
         for (WarehouseActionEntitiesValidator validator : validators) {

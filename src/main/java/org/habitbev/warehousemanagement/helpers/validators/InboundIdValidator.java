@@ -28,24 +28,27 @@ public class InboundIdValidator implements WarehouseActionEntitiesValidator {
 
     @Override
     public WarehouseValidatedEntities.Builder validate(WarehouseActionValidationRequest input, WarehouseValidatedEntities.Builder warehouseEntityBuilder) {
+
+        Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
+
+        Preconditions.checkArgument(warehouseEntityBuilder != null, "gatheredWarehouseEntities cannot be null");
+        String inboundId = input.getInboundId();
+        String warehouseId = input.getWarehouseId();
+        Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
+        Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
         try {
-            Preconditions.checkArgument(input != null, "inboundIdExistenceValidator.input cannot be null");
-            String inboundId = input.getInboundId();
-            String warehouseId = input.getWarehouseId();
-            Preconditions.checkArgument(StringUtils.isNotBlank(inboundId), "inboundId cannot be blank");
-            Preconditions.checkArgument(StringUtils.isNotBlank(warehouseId), "warehouseId cannot be blank");
             Optional<FinishedGoodsInbound> finishedGoodsInboundOp = inboundDAO.get(warehouseId, inboundId);
             if (!finishedGoodsInboundOp.isPresent()) {
                 String message = String.format("InboundId %s in warehouseid %s does not exist", inboundId, warehouseId);
                 throw new ResourceNotAvailableException(message);
             }
             FinishedGoodsInbound finishedGoodsInbound = finishedGoodsInboundOp.get();
-            if(new Closed().equals(finishedGoodsInbound.getInboundStatus())) {
-                String message = String.format("InboundId %s in warehouseId %s is already closed",inboundId, warehouseId);
-                throw  new WarehouseActionValidationException(message);
+            if (new Closed().equals(finishedGoodsInbound.getInboundStatus())) {
+                String message = String.format("InboundId %s in warehouseId %s is already closed", inboundId, warehouseId);
+                throw new WarehouseActionValidationException(message);
             }
             return warehouseEntityBuilder.fgInboundDTO(FGInboundDTO.fromDbEntity(finishedGoodsInbound));
-        } catch (IllegalArgumentException |ResourceNotAvailableException |InconsistentStateException e) {
+        } catch (IllegalArgumentException | ResourceNotAvailableException | InconsistentStateException e) {
             throw new WarehouseActionValidationException(e);
         }
 
